@@ -1,0 +1,29 @@
+#define RESET 0x1e
+
+// D1 conversion
+
+#define CONVERT_D1_OSR256 0x40
+#define CONVERT_D1_OSR512 0x42
+#define CONVERT_D1_OSR1024 0x44
+#define CONVERT_D1_OSR2048 0x46
+#define CONVERT_D1_OSR4096 0x48
+
+
+// D2 conversion
+
+#define CONVERT_D2_OSR256 0x50
+#define CONVERT_D2_OSR512 0x52
+#define CONVERT_D2_OSR1024 0x54
+#define CONVERT_D2_OSR2048 0x56
+#define CONVERT_D2_OSR4096 0x58
+
+#define ADC_READ 0x00
+
+#define PROM_READ_FACTORY_DATA 0xA0
+#define PROM_READ_C1 0xA2
+#define PROM_READ_C2 0xA4
+#define PROM_READ_C3 0xA6
+#define PROM_READ_C4 0xA8
+#define PROM_READ_C5 0xAA
+#define PROM_READ_C6 0xAC
+#define PROM_READ_CRC 0xAD
