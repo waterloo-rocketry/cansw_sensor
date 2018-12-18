@@ -67,7 +67,7 @@ void PIN_MANAGER_Initialize (void)
      * Setting the GPIO Direction SFR(s)
      ***************************************************************************/
     TRISA = 0x001F;
-    TRISB = 0xFE7F;
+    TRISB = 0xFEFF;
 
     /****************************************************************************
      * Setting the Weak Pull Up and Weak Pull Down SFR(s)
@@ -90,11 +90,6 @@ void PIN_MANAGER_Initialize (void)
     ANSELB = 0x0103;
 
 
-    /****************************************************************************
-     * Set the PPS
-     ***************************************************************************/
-    RPINR22bits.SDI2R = 0x0029;    //;   //RB9->SPI2:SDI2
-    RPOR2bits.RP39R = 0x0008;    //;   //RB7->SPI2:SDO2
 
 }
 
