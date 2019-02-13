@@ -26,4 +26,4 @@
 #define PROM_READ_C4 0xA8
 #define PROM_READ_C5 0xAA
 #define PROM_READ_C6 0xAC
-#define PROM_READ_CRC 0xAD
+#define PROM_READ_CRC 0xAE
