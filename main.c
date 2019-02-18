@@ -14,6 +14,13 @@
 #define RED_LED_ON() (LATBbits.LATB15 = 0)
 #define RED_LED_OFF() (LATBbits.LATB15 = 1) 
 
+unsigned short C1;
+unsigned short C2;
+unsigned short C3;
+unsigned short C4;
+unsigned short C5;
+unsigned short C6;
+
 static void led_init() {
     TRISAbits.TRISA0 = 0;
     LATAbits.LATA0 = 1;
@@ -26,13 +33,39 @@ static void led_init() {
 }
 
 void barometric_pressure_init() {
-    RESET;
-    PROM_READ_C1;
-    PROM_READ_C2;
-    PROM_READ_C3;
-    PROM_READ_C4;
-    PROM_READ_C5;
-    PROM_READ_C6;
+    baro_spi_select();
+    
+    spi_write(RESET);
+    
+    spi_write(PROM_READ_C1);
+    unsigned char C1_high_val = spi_read();
+    unsigned char C1_low_val = spi_read();
+    C1 = (unsigned short)C1_high_val << 8 | C1_low_val;
+    
+    spi_write(PROM_READ_C2);
+    unsigned char C2_high_val = spi_read();
+    unsigned char C2_low_val = spi_read();
+    C2 = (unsigned short)C2_high_val << 8 | C2_low_val;
+    
+    spi_write(PROM_READ_C3);
+    unsigned char C3_high_val = spi_read();
+    unsigned char C3_low_val = spi_read();
+    C3 = (unsigned short)C3_high_val << 8 | C3_low_val;
+    
+    spi_write(PROM_READ_C4);
+    unsigned char C4_high_val = spi_read();
+    unsigned char C4_low_val = spi_read();
+    C4 = (unsigned short)C4_high_val << 8 | C4_low_val;
+    
+    spi_write(PROM_READ_C5);
+    unsigned char C5_high_val = spi_read();
+    unsigned char C5_low_val = spi_read();
+    C5 = (unsigned short)C5_high_val << 8 | C5_low_val;
+    
+    spi_write(PROM_READ_C6);
+    unsigned char C6_high_val = spi_read();
+    unsigned char C6_low_val = spi_read();
+    C6 = (unsigned short)C6_high_val << 8 | C6_low_val;
 }
 
 int main(int argc, char** argv) {
