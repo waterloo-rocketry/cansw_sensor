@@ -34,8 +34,6 @@ static void led_init() {
 }
 
 void barometric_pressure_init() {
-    baro_spi_select();
-    
     spi_write(RESET);
     
     spi_write(PROM_READ_C1);
@@ -77,7 +75,38 @@ int main(int argc, char** argv) {
     spi_init();
     chip_select_init();
     
+    baro_spi_select();
+    
     barometric_pressure_init();
+    
+    spi_write(CONVERT_D1_OSR1024);
+    spi_write(ADC_READ);
+    
+    uint8_t D1_high_val = spi_read();
+    uint8_t D1_mid_val = spi_read();
+    uint8_t D1_low_val = spi_read();
+    uint32_t D1 = (uint32_t)D1_high_val << 16 | D1_mid_val << 8 | D1_low_val;
+    
+    spi_write(CONVERT_D2_OSR1024);
+    spi_write(ADC_READ);
+    
+    uint8_t D2_high_val = spi_read();
+    uint8_t D2_mid_val = spi_read();
+    uint8_t D2_low_val = spi_read();
+    uint32_t D2 = (uint32_t)D2_high_val << 16 | D2_mid_val << 8 | D2_low_val;
+    
+    int32_t dT = D2 - C5 * pow(2,8);
+    int32_t TEMP = 2000 + dT * C6 / pow(2,23);
+    
+    printf("%d", TEMP);
+    
+    int64_t OFF = C2 * pow(2,16) + (C4 * dT) / pow(2,7);
+    int64_t SENS = C1 * pow(2,15) + (C3 * dT ) / pow(2,8);
+    int32_t P = (D1 * SENS / pow(2,21) - OFF) / pow(2,15);
+    
+    printf("%d", TEMP);
+    
+    baro_spi_release();
     
     /*__delay32(100 * (_XTAL_FREQ / 1000));
     
@@ -92,18 +121,5 @@ int main(int argc, char** argv) {
 
     }*/
     
-    CONVERT_D1_OSR1024;
-    CONVERT_D2_OSR1024;
-    
-    signed int dT = CONVERT_D2_OSR1024 - PROM_READ_C5 * pow(2,8);
-    signed int TEMP = 2000 + dT * PROM_READ_C6 / pow(2,23);
-    ADC_READ;
-    
-    long signed int OFF = PROM_READ_C2 * pow(2,16) + (PROM_READ_C4 * dT) / pow(2,7);
-    long signed int SENS = PROM_READ_C1 * pow(2,15) + (PROM_READ_C3 * dT ) / pow(2,8);
-    signed int P = (CONVERT_D1_OSR1024 * SENS / pow(2,21) - OFF) / pow(2,15);
-    ADC_READ;
-    
     return (EXIT_SUCCESS);
 }
-
