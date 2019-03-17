@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
     uint8_t D1_high_val = spi_read();
     uint8_t D1_mid_val = spi_read();
     uint8_t D1_low_val = spi_read();
-    uint32_t D1 = (uint32_t)D1_high_val << 16 | D1_mid_val << 8 | D1_low_val;
+    uint32_t D1 = (uint32_t)D1_high_val << 16 | (uint16_t)D1_mid_val << 8 | D1_low_val;
     
     spi_write(CONVERT_D2_OSR1024);
     spi_write(ADC_READ);
@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
     uint8_t D2_high_val = spi_read();
     uint8_t D2_mid_val = spi_read();
     uint8_t D2_low_val = spi_read();
-    uint32_t D2 = (uint32_t)D2_high_val << 16 | D2_mid_val << 8 | D2_low_val;
+    uint32_t D2 = (uint32_t)D2_high_val << 16 | (uint16_t)D2_mid_val << 8 | D2_low_val;
     
     int32_t dT = D2 - C5 * pow(2,8);
     int32_t TEMP = 2000 + dT * C6 / pow(2,23);
@@ -103,8 +103,6 @@ int main(int argc, char** argv) {
     int64_t OFF = C2 * pow(2,16) + (C4 * dT) / pow(2,7);
     int64_t SENS = C1 * pow(2,15) + (C3 * dT ) / pow(2,8);
     int32_t P = (D1 * SENS / pow(2,21) - OFF) / pow(2,15);
-    
-    printf("%d", TEMP);
     
     baro_spi_release();
     
