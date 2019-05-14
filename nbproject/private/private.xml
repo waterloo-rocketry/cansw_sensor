@@ -3,11 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/alexm/dev/cansw/sensor/mcc_generated_files/mcc.h</file>
             <file>file:/Users/alexm/dev/cansw/sensor/main.c</file>
-            <file>file:/Users/alexm/dev/cansw/sensor/mcc_generated_files/system.h</file>
-            <file>file:/Users/alexm/dev/cansw/sensor/spi.c</file>
-            <file>file:/Users/alexm/dev/cansw/sensor/spi.h</file>
+            <file>file:/Users/alexm/dev/cansw/sensor/sensor_general.c</file>
+            <file>file:/Users/alexm/dev/cansw/sensor/sensor_general.h</file>
         </group>
     </open-files>
 </project-private>
