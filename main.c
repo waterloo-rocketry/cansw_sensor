@@ -26,14 +26,8 @@ uint8_t tx_pool[100];
 int main(int argc, char** argv) {
     // MCC generated initializer
     SYSTEM_Initialize();
-    OSCILLATOR_Initialize();
-
-    FVR_Initialize();
-    ADCC_Initialize();
+    
     ADCC_DisableContinuousConversion();
-
-    // I2C1 Pins: SCL1 -> RC3, SDA1 -> RC4
-    I2C1_Initialize();
     LED_init();
 
     // init our millisecond function
@@ -66,7 +60,8 @@ int main(int argc, char** argv) {
         if (millis() - last_millis > MAX_LOOP_TIME_DIFF_ms) {
 
             // check for general board status
-
+            bool status_ok = true;   
+            
             // if there was an issue, a message would already have been sent out
             if (status_ok) { send_status_ok(); }
             
@@ -94,7 +89,7 @@ int main(int argc, char** argv) {
     return (EXIT_SUCCESS);
 }
 
-static void interrupt interrupt_handler() {
+static void __interrupt() interrupt_handler() {
     if (PIR5) {
         can_handle_interrupt();
     }
@@ -147,9 +142,6 @@ static void can_msg_handler(const can_msg_t *msg) {
             // send a message or something
             break;
     }
-
-    // keep track of heartbeat here
-    last_can_traffic_timestamp_ms = millis();
 }
 
 // Send a CAN message with nominal status

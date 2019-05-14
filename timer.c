@@ -1,5 +1,4 @@
 #include <xc.h>
-#include <pic18f26k83.h>
 
 #include "timer.h"
 
