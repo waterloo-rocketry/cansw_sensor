@@ -26,7 +26,7 @@ uint8_t tx_pool[100];
 int main(int argc, char** argv) {
     // MCC generated initializer
     SYSTEM_Initialize();
-    
+
     ADCC_DisableContinuousConversion();
     LED_init();
 
@@ -49,38 +49,34 @@ int main(int argc, char** argv) {
     can_timing_t can_setup;
     can_generate_timing_params(_XTAL_FREQ, &can_setup);
     can_init(&can_setup, can_msg_handler);
+
     // set up CAN tx buffer
     txb_init(tx_pool, sizeof(tx_pool), can_send, can_send_rdy);
 
     // loop timer
     uint32_t last_millis = millis();
 
-    bool led_on = false;   // visual heartbeat
     while (1) {
         if (millis() - last_millis > MAX_LOOP_TIME_DIFF_ms) {
 
             // check for general board status
-            bool status_ok = true;   
-            
-            // if there was an issue, a message would already have been sent out
+            // TODO
+            bool status_ok = true;
             if (status_ok) { send_status_ok(); }
-            
+
+            // get pressure
+            uint16_t pressure_psi = get_pressure_psi();
+            can_msg_t sensor_msg;
+            build_analog_data_msg(millis(), SENSOR_PRESSURE, pressure_psi, &sensor_msg);
+            txb_enqueue(&sensor_msg);
+
             // visual heartbeat indicator
-            if (led_on) {
-                LED_OFF();
-                led_on = false;
-            } else {
-                LED_ON();
-                led_on = true;
-            }
+            LED_heartbeat();
 
             // update our loop counter
             last_millis = millis();
         }
-        
-        // read sensor data and send it
-        
-        
+
         //send any queued CAN messages
         txb_heartbeat();
     }
