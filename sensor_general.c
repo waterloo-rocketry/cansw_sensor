@@ -21,13 +21,19 @@ void LED_heartbeat(void) {
 }
 
 uint32_t get_pressure_psi(void) {
-    adc_result_t pressure_raw = ADCC_GetSingleConversion(channel_PRESSURE);
+    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_PRESSURE);
 
-    int pressure_add = 0;
-    int pressure_scale = 1;
-    
-    int pressure_psi = pressure_raw * pressure_scale + pressure_add;
+    // Resistor divider maps 0-5V output to 0-1.5V
+    int voltage_5v = voltage_raw * 5 / 1.5;
+
+    // Scaling factors taken from (for P1):
+    // https://docs.google.com/spreadsheets/d/1NJDRvIkPtVGVRjQt-zyT8ZoKv0JL28MJ4FAHNd4Z_rc/edit#gid=0
+    int pressure_add = 65;
+    int pressure_scale = 620;
+
+    int pressure_psi = voltage_5v * pressure_scale + pressure_add;
     if (pressure_psi < 0) { pressure_psi = 0; }
-    
+
     return (uint32_t)pressure_psi;
 }
+
