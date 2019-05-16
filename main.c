@@ -145,6 +145,5 @@ static void send_status_ok(void) {
     can_msg_t board_stat_msg;
     build_board_stat_msg(millis(), E_NOMINAL, NULL, 0, &board_stat_msg);
 
-    // send it off at low priority
     txb_enqueue(&board_stat_msg);
 }
