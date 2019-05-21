@@ -62,7 +62,7 @@
 #pragma config MVECEN = OFF    // Multi-vector enable bit->Interrupt contoller does not use vector table to prioritze interrupts
 #pragma config IVT1WAY = ON    // IVTLOCK bit One-way set enable bit->IVTLOCK bit can be cleared and set only once
 #pragma config LPBOREN = OFF    // Low Power BOR Enable bit->ULPBOR disabled
-#pragma config BOREN = SBORDIS    // Brown-out Reset Enable bits->Brown-out Reset enabled , SBOREN bit is ignored
+#pragma config BOREN = OFF    // Brown-out Reset Enable bits->Brown-out Reset enabled , SBOREN bit is ignored
 
 // CONFIG2H
 #pragma config BORV = VBOR_2P45    // Brown-out Reset Voltage Selection bits->Brown-out Reset Voltage (VBOR) set to 2.45V

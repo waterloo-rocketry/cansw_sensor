@@ -7,8 +7,8 @@
 
 #define MAX_LOOP_TIME_DIFF_ms 250
 
-#define LED_ON() (LATC5 = 0)
-#define LED_OFF() (LATC5 = 1)
+#define LED_ON() (LATB4 = 0)
+#define LED_OFF() (LATB4 = 1)
 
 // Initialize LEDS
 void LED_init(void);

@@ -5,8 +5,8 @@
 #include "sensor_general.h"
 
 void LED_init(void) {
-    TRISC5 = 0;     //set B4 as output
-    LATC5 = 1;      // turn the led off
+    TRISB4 = 0;     //set B4 as output
+    LATB4 = 1;      // turn the led off
 }
 
 void LED_heartbeat(void) {
