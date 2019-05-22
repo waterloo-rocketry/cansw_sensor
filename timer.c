@@ -34,7 +34,7 @@ void timer0_init(void) {
     T0CON1bits.CKPS = 0;
     
     T0CON1bits.CS = 0x5;    // drive timer from 500 kHz
-    T0CON1bits.ASYNC = 0;
+    T0CON1bits.ASYNC = 1;
 
      //enable the module
     T0CON0bits.EN = 1;
