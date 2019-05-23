@@ -15,6 +15,7 @@
 
 #include "sensor_general.h"
 #include "timer.h"
+#include "error_checks.h"
 #include <xc.h>
 
 static void can_msg_handler(const can_msg_t *msg);
@@ -60,8 +61,8 @@ int main(int argc, char** argv) {
         if (millis() - last_millis > MAX_LOOP_TIME_DIFF_ms) {
 
             // check for general board status
-            // TODO
             bool status_ok = true;
+            status_ok &= check_bus_current_error();
             if (status_ok) { send_status_ok(); }
 
             // get pressure
