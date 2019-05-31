@@ -24,14 +24,14 @@ uint32_t get_pressure_psi(void) {
     adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_PRESSURE);
 
     // Resistor divider maps 0-5V output to 0-1.5V
-    int voltage_5v = voltage_raw * 5 / 1.5;
+    int voltage_5v = voltage_raw * 5 / 6;
 
     // Scaling factors taken from (for P1):
     // https://docs.google.com/spreadsheets/d/1NJDRvIkPtVGVRjQt-zyT8ZoKv0JL28MJ4FAHNd4Z_rc/edit#gid=0
-    int pressure_add = 65;
-    int pressure_scale = 620;
+    int32_t pressure_add = (10); // adjusted scaling values from may 25th
+    int32_t pressure_scale = (620*0.9741);
 
-    int pressure_psi = voltage_5v * pressure_scale + pressure_add;
+    int32_t pressure_psi = voltage_5v * pressure_scale / 1000 + pressure_add;
     if (pressure_psi < 0) { pressure_psi = 0; }
 
     return (uint32_t)pressure_psi;
