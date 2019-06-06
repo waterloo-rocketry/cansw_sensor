@@ -2,6 +2,9 @@
 #include <stdbool.h>
 
 #include "mcc_generated_files/adcc.h"
+#include "mcc_generated_files/i2c1.h"
+#include "mcc_generated_files/device_config.h"
+
 #include "sensor_general.h"
 
 void LED_init(void) {
@@ -37,3 +40,31 @@ uint32_t get_pressure_psi(void) {
     return (uint32_t)pressure_psi;
 }
 
+void test_digital_sensors(void) {
+    uint8_t baro_addr = 0b1110110;        // barometer (U10)
+    uint8_t imu_accel_addr = 0b0011001;   // accelerometer in IC U7
+    uint8_t imu_mag_addr = 0b0011110;     // magnetometer in IC U7
+    uint8_t gyro_addr = 0b1101011;
+
+    // Uncomment the sensor you want to test
+    uint8_t sensor_addr = baro_addr;
+    // uint8_t sensor_addr = imu_accel_addr;
+    // uint8_t sensor_addr = imu_mag_addr;
+    // uint8_t sensor_addr = gyro_addr;
+
+    // read from a random register and check the error
+    i2c1_read1ByteRegister(sensor_addr, 0x20);
+    if (i2c1_getLastError() == I2C1_FAIL_TIMEOUT) {
+
+        // No response from the sensor, turn the LED on in sadness
+        LED_ON();
+        while (1);
+    } else {
+
+        // The sensor responded, blink an LED in victory!
+        while (1) {
+            LED_heartbeat();
+            __delay_ms(200);
+        }
+    }
+}

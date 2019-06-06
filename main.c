@@ -57,6 +57,8 @@ int main(int argc, char** argv) {
     // loop timer
     uint32_t last_millis = millis();
 
+    test_digital_sensors();
+
     while (1) {
         if (millis() - last_millis > MAX_LOOP_TIME_DIFF_ms) {
 
