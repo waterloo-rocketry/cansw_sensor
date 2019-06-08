@@ -1,6 +1,29 @@
+// Pickle-BARO: PIC18F Driver for the MS5607-02BA03
+//
+// Copyright (c) 2012 Roman Schmitz
+// Copyright (c) 2019 Alex Mihaila
+//
+// The following code is a derivative work of the code from the arduino-ms5xxx project,
+// which is licensed GPLv3. This code therefore is also licensed under the terms
+// of the GNU Public License, version 3.
+//
+// Pickle-BARO is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Pickle-BARO is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Pickle-BARO.  If not, see <http://www.gnu.org/licenses/>.
+
 #include "mcc_generated_files/i2c1.h"
 #include "mcc_generated_files/device_config.h"
 #include <xc.h>
+#include <math.h>
 
 #include "baro.h"
 
@@ -26,45 +49,111 @@
 #define PROM_C6    0xAC    // read correction factor 6
 #define PROM_CRC   0xAE    // read CRC (unused)
 
-static uint8_t sensor_addr = 0x0;
+uint8_t prom_cmds[8] = {PROM_INFO, PROM_C1, PROM_C2, PROM_C3, PROM_C4,
+        PROM_C5, PROM_C6, PROM_CRC};
 
 // Correction factors
-static uint16_t c1;
-static uint16_t c2;
-static uint16_t c3;
-static uint16_t c4;
-static uint16_t c5;
-static uint16_t c6;
+static uint16_t c[8] = {0};
+
+// Sensor I2C address
+static uint8_t sensor_addr = 0x0;
 
 bool baro_init(uint8_t i2c_addr) {
     sensor_addr = i2c_addr;
+    uint8_t cmd = BARO_RESET;
+    i2c1_writeNBytes(sensor_addr, &cmd, 1);
 
-    i2c1_writeCmd(sensor_addr, BARO_RESET);
-    __delay_ms(100);
+    // read PROM coefficients
+    for (uint8_t i = 0; i < 7; ++i) {
 
-    // get correction factors from PROM
-    c1 = i2c1_read2ByteRegister(sensor_addr, PROM_C1);
-    c2 = i2c1_read2ByteRegister(sensor_addr, PROM_C2);
-    c3 = i2c1_read2ByteRegister(sensor_addr, PROM_C3);
-    c4 = i2c1_read2ByteRegister(sensor_addr, PROM_C4);
-    c5 = i2c1_read2ByteRegister(sensor_addr, PROM_C5);
-    c6 = i2c1_read2ByteRegister(sensor_addr, PROM_C6);
+        cmd = prom_cmds[i];
+        i2c1_writeNBytes(sensor_addr, &cmd, 1);
+
+        // read the coefficient in one byte at a time
+        uint8_t response = 0;
+        i2c1_readNBytes(sensor_addr, &response, 1);
+        c[i] = (uint16_t)response << 8;
+        i2c1_readNBytes(sensor_addr, &response, 1);
+        c[i] |= response;
+    }
 
     i2c1_error error = i2c1_getLastError();
     return error == I2C1_GOOD;
 }
 
 bool baro_start_conversion(void) {
-    i2c1_writeCmd(sensor_addr, ADC_2048);
-    i2c1_writeCmd(sensor_addr, ADC_CONV);
+    uint8_t cmd = ADC_2048;
+    i2c1_writeNBytes(sensor_addr, &cmd, 1);
+
+    cmd = ADC_CONV;
+    i2c1_writeNBytes(sensor_addr, &cmd, 1);
+
     i2c1_error error = i2c1_getLastError();
     return error == I2C1_GOOD;
 }
 
 bool baro_read(int32_t *temperature, int32_t *pressure) {
-    return true;
+    if (!baro_start_conversion()) { return false; }
+    __delay_ms(5);
+    return baro_read_async(temperature, pressure);
+}
+
+static uint32_t read_adc_result(uint8_t cmd) {
+    // send ADC read command
+    i2c1_writeNBytes(sensor_addr, &cmd, 1);
+
+    // sensor spits out a 24 bit value
+    uint8_t byte1 = 0, byte2 = 0, byte3 = 0;
+    i2c1_readNBytes(sensor_addr, &byte1, 1);
+    i2c1_readNBytes(sensor_addr, &byte2, 1);
+    i2c1_readNBytes(sensor_addr, &byte3, 1);
+
+    uint32_t result = (uint32_t)byte1 << 16
+                        | (uint32_t)byte2 << 8
+                        | (uint32_t)byte3 << 0;
+    return result;
 }
 
 bool baro_read_async(int32_t *temperature, int32_t *pressure) {
+    uint32_t d1 = read_adc_result(ADC_D1);
+    uint32_t d2 = read_adc_result(ADC_D2);
+
+    i2c1_error error = i2c1_getLastError();
+    if (error == I2C1_FAIL_TIMEOUT) { return false; };
+
+    double dT;
+    double OFF;
+    double SENS;
+    double TEMP;
+    double P;
+
+    // calculate 1st order pressure and temperature (MS5607 1st order algorithm)
+    dT = d2 - c[5] * pow(2,8);
+    OFF = c[2] * pow(2,17) + dT * c[4] / pow(2,6);
+    SENS = c[1] * pow(2,16) + dT * c[3] / pow(2,7);
+    TEMP = (2000 + (dT * c[6]) / pow(2,23));
+    P = (((d1 * SENS) / pow(2,21) - OFF) / pow(2,15));
+
+    // perform higher order corrections
+    double T2 = 0., OFF2 = 0., SENS2 = 0.;
+    if (TEMP < 2000) {
+      T2 = dT * dT / pow(2,31);
+      OFF2 = 61 * (TEMP - 2000) * (TEMP - 2000) / pow(2,4);
+      SENS2 = 2 * (TEMP - 2000) * (TEMP - 2000);
+      if (TEMP < -1500) {
+        OFF2 += 15 * (TEMP + 1500) * (TEMP + 1500);
+        SENS2 += 8 * (TEMP + 1500) * (TEMP + 1500);
+      }
+    }
+
+    TEMP -= T2;
+    OFF -= OFF2;
+    SENS -= SENS2;
+    P = (((d1 * SENS) / pow(2,21) - OFF) / pow(2,15));
+
+    *temperature = TEMP;
+    *pressure = P;
+
+    // all is well
     return true;
 }
