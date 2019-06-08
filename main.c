@@ -17,6 +17,7 @@
 #include "timer.h"
 #include "error_checks.h"
 #include "baro.h"
+#include "lsm303agr.h"
 #include <xc.h>
 
 static void can_msg_handler(const can_msg_t *msg);
@@ -59,6 +60,7 @@ int main(int argc, char** argv) {
     uint32_t last_millis = millis();
 
     baro_init(BARO_ADDR);
+    lsm303_init(LSM303_ACCEL_ADDR, LSM303_MAG_ADDR);
 
     while (1) {
         if (millis() - last_millis > MAX_LOOP_TIME_DIFF_ms) {
@@ -79,6 +81,9 @@ int main(int argc, char** argv) {
 #endif
             build_analog_data_msg(millis(), sensor_id, pressure_psi, &sensor_msg);
             txb_enqueue(&sensor_msg);
+
+            int32_t temperature, pressure;
+            baro_read(&temperature, &pressure);
 
             // visual heartbeat indicator
             LED_heartbeat();
