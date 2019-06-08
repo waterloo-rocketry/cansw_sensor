@@ -92,7 +92,7 @@ bool baro_start_conversion(void) {
     return error == I2C1_GOOD;
 }
 
-bool baro_read(int32_t *temperature, int32_t *pressure) {
+bool baro_read(double *temperature, double *pressure) {
     if (!baro_start_conversion()) { return false; }
     __delay_ms(5);
     return baro_read_async(temperature, pressure);
@@ -114,7 +114,7 @@ static uint32_t read_adc_result(uint8_t cmd) {
     return result;
 }
 
-bool baro_read_async(int32_t *temperature, int32_t *pressure) {
+bool baro_read_async(double *temperature, double *pressure) {
     uint32_t d1 = read_adc_result(ADC_D1);
     uint32_t d2 = read_adc_result(ADC_D2);
 

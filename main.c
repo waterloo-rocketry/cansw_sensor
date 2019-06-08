@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
             build_analog_data_msg(millis(), sensor_id, pressure_psi, &sensor_msg);
             txb_enqueue(&sensor_msg);
 
-            int32_t temperature, pressure;
+            double temperature, pressure;
             baro_read(&temperature, &pressure);
 
             // visual heartbeat indicator
