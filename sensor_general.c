@@ -28,10 +28,10 @@ uint32_t get_pressure_psi(void) {
 
     // Scaling factors taken from (for P1):
     // https://docs.google.com/spreadsheets/d/1NJDRvIkPtVGVRjQt-zyT8ZoKv0JL28MJ4FAHNd4Z_rc/edit#gid=0
-    int32_t pressure_add = (10); // adjusted scaling values from may 25th
-    int32_t pressure_scale = (620*0.9741);
+    int32_t pressure_add = (40); // adjusted scaling values from june 12th
+    double pressure_scale = (621.55265);
 
-    int32_t pressure_psi = voltage_5v * pressure_scale / 1000 + pressure_add;
+    int32_t pressure_psi = (int32_t) voltage_5v * pressure_scale / (1000) + pressure_add;
     if (pressure_psi < 0) { pressure_psi = 0; }
 
     return (uint32_t)pressure_psi;
