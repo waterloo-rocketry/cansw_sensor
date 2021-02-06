@@ -30,6 +30,8 @@
 // i2c commands
 #define BARO_RESET    0x1E    // perform reset
 #define ADC_READ 0x00    // initiate read sequence
+// The actual conversion command sent needs to be the result of or-ing ADC_CONV
+// D1 or D2, and an oversampling ratio.
 #define ADC_CONV 0x40    // start conversion
 #define ADC_D1   0x00    // read ADC 1
 #define ADC_D2   0x10    // read ADC 2
@@ -60,66 +62,46 @@ static uint8_t sensor_addr = 0x0;
 
 bool baro_init(uint8_t i2c_addr) {
     sensor_addr = i2c_addr;
-    uint8_t cmd = BARO_RESET;
-    i2c1_writeNBytes(sensor_addr, &cmd, 1);
+    i2c1_writeCmd(sensor_addr, BARO_RESET);
+    __delay_ms(5);
 
     // read PROM coefficients
     for (uint8_t i = 0; i < 7; ++i) {
-
-        cmd = prom_cmds[i];
-        i2c1_writeNBytes(sensor_addr, &cmd, 1);
-
-        // read the coefficient in one byte at a time
-        uint8_t response = 0;
-        i2c1_readNBytes(sensor_addr, &response, 1);
-        c[i] = (uint16_t)response << 8;
-        i2c1_readNBytes(sensor_addr, &response, 1);
-        c[i] |= response;
+        c[i] = i2c1_read2ByteRegister(sensor_addr, prom_cmds[i]);
     }
 
     i2c1_error error = i2c1_getLastError();
     return error == I2C1_GOOD;
 }
 
-bool baro_start_conversion(void) {
-    uint8_t cmd = ADC_2048;
-    i2c1_writeNBytes(sensor_addr, &cmd, 1);
-
-    cmd = ADC_CONV;
-    i2c1_writeNBytes(sensor_addr, &cmd, 1);
+bool baro_start_conversion(uint8_t cmd) {
+    i2c1_writeCmd(sensor_addr, ADC_CONV | cmd);
 
     i2c1_error error = i2c1_getLastError();
     return error == I2C1_GOOD;
 }
 
-bool baro_read(double *temperature, double *pressure) {
-    if (!baro_start_conversion()) { return false; }
-    __delay_ms(5);
-    return baro_read_async(temperature, pressure);
-}
+static uint32_t read_adc_result(void) {
+    uint8_t data[3];
+    i2c1_readDataBlock(sensor_addr, ADC_READ, data, 3);
 
-static uint32_t read_adc_result(uint8_t cmd) {
-    // send ADC read command
-    i2c1_writeNBytes(sensor_addr, &cmd, 1);
-
-    // sensor spits out a 24 bit value
-    uint8_t byte1 = 0, byte2 = 0, byte3 = 0;
-    i2c1_readNBytes(sensor_addr, &byte1, 1);
-    i2c1_readNBytes(sensor_addr, &byte2, 1);
-    i2c1_readNBytes(sensor_addr, &byte3, 1);
-
-    uint32_t result = (uint32_t)byte1 << 16
-                        | (uint32_t)byte2 << 8
-                        | (uint32_t)byte3 << 0;
+    uint32_t result = (uint32_t)(data[0]) << 16
+                    | (uint32_t)(data[1]) << 8
+                    | (uint32_t)(data[2]) << 0;
     return result;
 }
 
-bool baro_read_async(double *temperature, double *pressure) {
-    uint32_t d1 = read_adc_result(ADC_D1);
-    uint32_t d2 = read_adc_result(ADC_D2);
+bool baro_read(double *temperature, double *pressure) {
+    baro_start_conversion(ADC_D1 | ADC_2048);
+    __delay_ms(10);
+    uint32_t d1 = read_adc_result();
+
+    baro_start_conversion(ADC_D2 | ADC_2048);
+    __delay_ms(10);
+    uint32_t d2 = read_adc_result();
 
     i2c1_error error = i2c1_getLastError();
-    if (error == I2C1_FAIL_TIMEOUT) { return false; };
+    if (error != I2C1_GOOD) { return false; };
 
     double dT;
     double OFF;

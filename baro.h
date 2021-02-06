@@ -32,14 +32,8 @@
 
 bool baro_init(uint8_t i2c_addr);
 
-bool baro_start_conversion(void);
-
 // Starts a new ADC conversion, waits for it to complete, and
 // computes pressure and temperature from the results.
 bool baro_read(double *temperature, double *pressure);
-
-// Returns whatever is in the ADC at this time and converts it
-// to pressure and temperature. Does not start a new ADC conversion.
-bool baro_read_async(double *temperature, double *pressure);
 
 #endif
