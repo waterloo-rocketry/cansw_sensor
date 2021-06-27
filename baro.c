@@ -20,10 +20,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Pickle-BARO.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "mcc_generated_files/i2c1.h"
 #include "mcc_generated_files/device_config.h"
 #include <xc.h>
 #include <math.h>
+#include "my2c.h"
 
 #include "baro.h"
 
@@ -60,30 +60,24 @@ static uint16_t c[8] = {0};
 // Sensor I2C address
 static uint8_t sensor_addr = 0x0;
 
-bool baro_init(uint8_t i2c_addr) {
+void baro_init(uint8_t i2c_addr) {
     sensor_addr = i2c_addr;
-    i2c1_writeCmd(sensor_addr, BARO_RESET);
+    MY2C_write(sensor_addr, BARO_RESET);
     __delay_ms(5);
 
     // read PROM coefficients
     for (uint8_t i = 0; i < 7; ++i) {
-        c[i] = i2c1_read2ByteRegister(sensor_addr, prom_cmds[i]);
+        c[i] = MY2C_read2ByteRegister(sensor_addr, prom_cmds[i]);
     }
-
-    i2c1_error error = i2c1_getLastError();
-    return error == I2C1_GOOD;
 }
 
-bool baro_start_conversion(uint8_t cmd) {
-    i2c1_writeCmd(sensor_addr, ADC_CONV | cmd);
-
-    i2c1_error error = i2c1_getLastError();
-    return error == I2C1_GOOD;
+void baro_start_conversion(uint8_t cmd) {
+    MY2C_write(sensor_addr, ADC_CONV | cmd);
 }
 
 static uint32_t read_adc_result(void) {
     uint8_t data[3];
-    i2c1_readDataBlock(sensor_addr, ADC_READ, data, 3);
+    MY2C_readNByteRegister(sensor_addr, ADC_READ, data, 3);
 
     uint32_t result = (uint32_t)(data[0]) << 16
                     | (uint32_t)(data[1]) << 8
@@ -91,7 +85,7 @@ static uint32_t read_adc_result(void) {
     return result;
 }
 
-bool baro_read(double *temperature, double *pressure) {
+void baro_read(double *temperature, double *pressure) {
     baro_start_conversion(ADC_D1 | ADC_2048);
     __delay_ms(10);
     uint32_t d1 = read_adc_result();
@@ -99,9 +93,6 @@ bool baro_read(double *temperature, double *pressure) {
     baro_start_conversion(ADC_D2 | ADC_2048);
     __delay_ms(10);
     uint32_t d2 = read_adc_result();
-
-    i2c1_error error = i2c1_getLastError();
-    if (error != I2C1_GOOD) { return false; };
 
     double dT;
     double OFF;
@@ -135,7 +126,4 @@ bool baro_read(double *temperature, double *pressure) {
 
     *temperature = TEMP;
     *pressure = P;
-
-    // all is well
-    return true;
 }

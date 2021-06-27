@@ -8,7 +8,6 @@
 #include "canlib/util/timing_util.h"
 #include "canlib/util/can_tx_buffer.h"
 
-#include "mcc_generated_files/i2c1.h"
 #include "mcc_generated_files/mcc.h"
 #include "mcc_generated_files/adcc.h"
 #include "mcc_generated_files/pin_manager.h"
@@ -17,6 +16,7 @@
 #include "timer.h"
 #include "error_checks.h"
 #include "baro.h"
+#include "my2c.h"
 #include "lsm303agr.h"
 #include <xc.h>
 
@@ -59,8 +59,9 @@ int main(int argc, char** argv) {
     // loop timer
     uint32_t last_millis = millis();
 
+    MY2C_init();
     baro_init(BARO_ADDR);
-    lsm303_init(LSM303_ACCEL_ADDR, LSM303_MAG_ADDR);
+//    lsm303_init(LSM303_ACCEL_ADDR, LSM303_MAG_ADDR);
 
     while (1) {
         if (millis() - last_millis > MAX_LOOP_TIME_DIFF_ms) {
@@ -84,6 +85,11 @@ int main(int argc, char** argv) {
 
             double temperature, pressure;
             baro_read(&temperature, &pressure);
+            // Temp is in hundredths of a degree, pressure in hundredths of a millibar
+            
+            can_msg_t baro_msg;
+            build_analog_data_msg(millis(), SENSOR_BARO, (uint16_t)(pressure / 100), &baro_msg);
+            txb_enqueue(&baro_msg);
 
             // visual heartbeat indicator
             LED_heartbeat();

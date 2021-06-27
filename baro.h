@@ -30,10 +30,10 @@
 #define BARO_LATENCY_MS 5
 #define BARO_RESOLUTION_MBAR 0.036f
 
-bool baro_init(uint8_t i2c_addr);
+void baro_init(uint8_t i2c_addr);
 
 // Starts a new ADC conversion, waits for it to complete, and
 // computes pressure and temperature from the results.
-bool baro_read(double *temperature, double *pressure);
+void baro_read(double *temperature, double *pressure);
 
 #endif
