@@ -58,6 +58,7 @@ int main(int argc, char** argv) {
 
     // loop timer
     uint32_t last_millis = millis();
+    uint32_t last_baro_millis = millis();
 
     MY2C_init();
     baro_init(BARO_ADDR);
@@ -83,19 +84,22 @@ int main(int argc, char** argv) {
             build_analog_data_msg(millis(), sensor_id, pressure_psi, &sensor_msg);
             txb_enqueue(&sensor_msg);
 
-            double temperature, pressure;
-            baro_read(&temperature, &pressure);
-            // Temp is in hundredths of a degree, pressure in hundredths of a millibar
-            
-            can_msg_t baro_msg;
-            build_analog_data_msg(millis(), SENSOR_BARO, (uint16_t)(pressure / 100), &baro_msg);
-            txb_enqueue(&baro_msg);
-
             // visual heartbeat indicator
             LED_heartbeat();
 
             // update our loop counter
             last_millis = millis();
+        }
+
+        if (millis() - last_baro_millis > 50) {
+            last_baro_millis = millis();
+            double temperature, pressure;
+            baro_read(&temperature, &pressure);
+            // Temp is in hundredths of a degree, pressure in hundredths of a millibar
+
+            can_msg_t baro_msg;
+            build_analog_data_msg(millis(), SENSOR_BARO, (uint16_t)(pressure / 10), &baro_msg);
+            txb_enqueue(&baro_msg);
         }
 
         //send any queued CAN messages

@@ -101,17 +101,17 @@ void baro_read(double *temperature, double *pressure) {
     double P;
 
     // calculate 1st order pressure and temperature (MS5607 1st order algorithm)
-    dT = d2 - c[5] * pow(2,8);
-    OFF = c[2] * pow(2,17) + dT * c[4] / pow(2,6);
-    SENS = c[1] * pow(2,16) + dT * c[3] / pow(2,7);
-    TEMP = (2000 + (dT * c[6]) / pow(2,23));
-    P = (((d1 * SENS) / pow(2,21) - OFF) / pow(2,15));
+    dT = d2 - c[5] * POW2(8);
+    OFF = c[2] * POW2(17) + dT * c[4] / POW2(6);
+    SENS = c[1] * POW2(16) + dT * c[3] / POW2(7);
+    TEMP = (2000 + (dT * c[6]) / POW2(23));
+    P = (((d1 * SENS) / POW2(21) - OFF) / POW2(15));
 
     // perform higher order corrections
     double T2 = 0., OFF2 = 0., SENS2 = 0.;
     if (TEMP < 2000) {
-      T2 = dT * dT / pow(2,31);
-      OFF2 = 61 * (TEMP - 2000) * (TEMP - 2000) / pow(2,4);
+      T2 = dT * dT / POW2(31);
+      OFF2 = 61 * (TEMP - 2000) * (TEMP - 2000) / POW2(4);
       SENS2 = 2 * (TEMP - 2000) * (TEMP - 2000);
       if (TEMP < -1500) {
         OFF2 += 15 * (TEMP + 1500) * (TEMP + 1500);
@@ -122,7 +122,7 @@ void baro_read(double *temperature, double *pressure) {
     TEMP -= T2;
     OFF -= OFF2;
     SENS -= SENS2;
-    P = (((d1 * SENS) / pow(2,21) - OFF) / pow(2,15));
+    P = (((d1 * SENS) / POW2(21) - OFF) / POW2(15));
 
     *temperature = TEMP;
     *pressure = P;

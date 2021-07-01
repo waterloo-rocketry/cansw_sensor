@@ -30,6 +30,8 @@
 #define BARO_LATENCY_MS 5
 #define BARO_RESOLUTION_MBAR 0.036f
 
+#define POW2(n) (double)((uint32_t)1 << n)
+
 void baro_init(uint8_t i2c_addr);
 
 // Starts a new ADC conversion, waits for it to complete, and

@@ -10,8 +10,8 @@ void MY2C_init(void)
     I2C1CON1 = 0x80;
     // ABD enabled; GCEN disabled; ACNT disabled; SDAHT 300 ns hold time; BFRET 8 I2C Clock pulses; FME disabled; 
     I2C1CON2 = 0x00;
-    // Setup clock reference to be base (500khz)/128
-    CLKRCON = 0b10010111;
+    // Setup clock reference to be base (500khz)/32
+    CLKRCON = 0b10010011;
     CLKRCLK = 0b00000011;
     // CLK clock reference 
     I2C1CLK = 0x04;
