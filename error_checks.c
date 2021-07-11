@@ -18,7 +18,8 @@
 //******************************************************************************
 
 bool check_bus_current_error(void){
-    adc_result_t sense_raw_mV = ADCC_GetSingleConversion(channel_CURR_5V);
+    // ADC is using FVR of 1.024V
+    adc_result_t sense_raw_mV = ADCC_GetSingleConversion(channel_CURR_5V) / 4;
     int curr_draw_mA = (sense_raw_mV) / 20;
 
     if (curr_draw_mA > OVERCURRENT_THRESHOLD_mA) {
