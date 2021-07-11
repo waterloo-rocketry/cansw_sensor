@@ -54,7 +54,6 @@
 #include "interrupt_manager.h"
 #include "adcc.h"
 #include "fvr.h"
-#include "i2c1.h"
 
 
 

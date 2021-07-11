@@ -97,6 +97,8 @@ void I2C1_Initialize(void);
 
 i2c1_error i2c1_getLastError(void);
 
+void i2c1_writeCmd(uint8_t address, uint8_t cmd);
+
 /**
   @Summary
     Writes a byte of data to a register of an I2C slave having 7 bit Address.

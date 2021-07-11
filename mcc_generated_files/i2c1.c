@@ -200,6 +200,18 @@ static inline void wait4MDRSetcount(uint8_t count)
     }
 }
 
+void i2c1_writeCmd(uint8_t address, uint8_t cmd) {
+    I2C1_Initialize();
+    I2C1ADB1 = (uint8_t)(address<<1);
+    wait4BusFree();
+    I2C1CNT = 2;
+    I2C1CON0bits.S = 1;
+    wait4Start();
+    sendByte(cmd);
+    wait4Stop();
+}
+
+
 void i2c1_write1ByteRegister(uint8_t address, uint8_t reg, uint8_t data)
 {
     I2C1_Initialize();
