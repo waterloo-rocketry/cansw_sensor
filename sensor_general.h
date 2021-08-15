@@ -21,9 +21,5 @@ void LED_heartbeat(void);
 // zero since canlib and RLCS don't like it.
 uint32_t get_pressure_psi(void);
 
-
-// Debug function for seeing if sensors are alive. DOES NOT RETURN.
-void test_digital_sensors(void);
-
 #endif	/* SENSOR_GEN_H */
 

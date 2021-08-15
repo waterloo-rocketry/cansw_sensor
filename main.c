@@ -24,7 +24,7 @@ static void can_msg_handler(const can_msg_t *msg);
 static void send_status_ok(void);
 
 //memory pool for the CAN tx buffer
-uint8_t tx_pool[100];
+uint8_t tx_pool[200];
 
 int main(int argc, char** argv) {
     // MCC generated initializer
@@ -59,10 +59,12 @@ int main(int argc, char** argv) {
     // loop timer
     uint32_t last_millis = millis();
     uint32_t last_baro_millis = millis();
+    uint32_t last_accel_millis = millis();
 
     MY2C_init();
     baro_init(BARO_ADDR);
-//    lsm303_init(LSM303_ACCEL_ADDR, LSM303_MAG_ADDR);
+    lsm303_init(LSM303_ACCEL_ADDR, LSM303_MAG_ADDR);
+    lsm303_check_sanity();
 
     while (1) {
         if (millis() - last_millis > MAX_LOOP_TIME_DIFF_ms) {
@@ -100,6 +102,15 @@ int main(int argc, char** argv) {
             can_msg_t baro_msg;
             build_analog_data_msg(millis(), SENSOR_BARO, (uint16_t)(pressure / 10), &baro_msg);
             txb_enqueue(&baro_msg);
+        }
+        if (millis() - last_accel_millis > 50) {
+            last_accel_millis = millis();
+            int16_t data[3];
+            lsm303_get_accel_raw(data, data + 1, data + 2);
+
+            can_msg_t imu_msg;
+            build_imu_data_msg(MSG_SENSOR_ACC, millis(), data, &imu_msg);
+            txb_enqueue(&imu_msg);
         }
 
         //send any queued CAN messages

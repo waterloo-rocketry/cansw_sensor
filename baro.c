@@ -62,7 +62,12 @@ static uint8_t sensor_addr = 0x0;
 
 void baro_init(uint8_t i2c_addr) {
     sensor_addr = i2c_addr;
-    MY2C_write(sensor_addr, BARO_RESET);
+
+    bool err = MY2C_writeCmd(sensor_addr, BARO_RESET);
+    if (err) {
+        __delay_ms(5);
+        MY2C_writeCmd(sensor_addr, BARO_RESET);
+    }
     __delay_ms(5);
 
     // read PROM coefficients
@@ -72,7 +77,7 @@ void baro_init(uint8_t i2c_addr) {
 }
 
 void baro_start_conversion(uint8_t cmd) {
-    MY2C_write(sensor_addr, ADC_CONV | cmd);
+    MY2C_writeCmd(sensor_addr, ADC_CONV | cmd);
 }
 
 static uint32_t read_adc_result(void) {
@@ -86,12 +91,12 @@ static uint32_t read_adc_result(void) {
 }
 
 void baro_read(double *temperature, double *pressure) {
-    baro_start_conversion(ADC_D1 | ADC_2048);
-    __delay_ms(10);
+    baro_start_conversion(ADC_D1 | ADC_256);
+    __delay_ms(1);
     uint32_t d1 = read_adc_result();
 
-    baro_start_conversion(ADC_D2 | ADC_2048);
-    __delay_ms(10);
+    baro_start_conversion(ADC_D2 | ADC_256);
+    __delay_ms(1);
     uint32_t d2 = read_adc_result();
 
     double dT;

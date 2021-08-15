@@ -6,15 +6,22 @@ extern "C" {
 #endif
     
 #include <stdint.h>
+#include <stdbool.h>
 
 void MY2C_init(void);
 
-void MY2C_write(uint8_t address, uint8_t cmd);
+bool MY2C_write(uint8_t address, uint8_t *data, uint8_t len);
 
-void MY2C_read(uint8_t address, uint8_t *data, uint8_t len);
+bool MY2C_read(uint8_t address, uint8_t *data, uint8_t len);
+
+bool MY2C_writeCmd(uint8_t address, uint8_t cmd);
 
 void MY2C_readNByteRegister(uint8_t address, uint8_t reg, uint8_t *data, uint8_t len);
-    
+
+bool MY2C_write1ByteRegister(uint8_t address, uint8_t reg, uint8_t val);
+
+uint8_t MY2C_read1ByteRegister(uint8_t address, uint8_t reg);
+
 uint16_t MY2C_read2ByteRegister(uint8_t address, uint8_t reg);
 
 #ifdef	__cplusplus
