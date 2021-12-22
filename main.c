@@ -156,22 +156,7 @@ static void can_msg_handler(const can_msg_t *msg) {
             break;
 
         // all the other ones - do nothing
-        case MSG_INJ_VALVE_CMD:
-        case MSG_VENT_VALVE_CMD:
-        case MSG_DEBUG_MSG:
-        case MSG_DEBUG_PRINTF:
-        case MSG_VENT_VALVE_STATUS:
-        case MSG_INJ_VALVE_STATUS:
-        case MSG_SENSOR_ACC:
-        case MSG_SENSOR_GYRO:
-        case MSG_SENSOR_MAG:
-        case MSG_SENSOR_ANALOG:
-        case MSG_GENERAL_BOARD_STATUS:
-            break;
-
-        // illegal message type - should never get here
         default:
-            // send a message or something
             break;
     }
 }
