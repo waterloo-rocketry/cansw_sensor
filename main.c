@@ -154,7 +154,7 @@ static void __interrupt() interrupt_handler() {
 
 static void can_msg_handler(const can_msg_t *msg) {
     uint16_t msg_type = get_message_type(msg);
-
+    int dest_id = -1;
     // ignore messages that were sent from this board
     if (get_board_unique_id(msg) == BOARD_UNIQUE_ID) {
         return;
@@ -173,6 +173,12 @@ static void can_msg_handler(const can_msg_t *msg) {
             LED_OFF();
             break;
 
+        case MSG_RESET_CMD:
+            dest_id = get_reset_board_id(msg);
+            if (dest_id == BOARD_UNIQUE_ID || dest_id == 0 ){
+                RESET();
+            }
+            break;
         // all the other ones - do nothing
         default:
             break;
