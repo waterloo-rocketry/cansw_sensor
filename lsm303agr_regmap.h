@@ -5,7 +5,7 @@
 #define OUT_TEMP_L_A 0x0C
 #define OUT_TEMP_H_A 0x0D
 #define INT_COUNTER_REG_A 0x0E
-#define WHO_AM_I_A 0x0F
+#define LSM_WHO_AM_I 0x0F
 #define TEMP_CFG_REG_A 0x1F
 
 #define CTRL_REG1_A 0x20

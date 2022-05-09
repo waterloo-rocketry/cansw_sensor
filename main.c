@@ -18,6 +18,7 @@
 #include "baro.h"
 #include "my2c.h"
 #include "lsm303agr.h"
+#include "MPU_6050.h"
 #include <xc.h>
 
 static void can_msg_handler(const can_msg_t *msg);
@@ -60,12 +61,16 @@ int main(int argc, char** argv) {
     uint32_t last_millis = millis();
     uint32_t last_baro_millis = millis();
     uint32_t last_accel_millis = millis();
+    uint32_t last_accel2_millis = millis();
 
     MY2C_init();
     baro_init(BARO_ADDR);
     lsm303_init(LSM303_ACCEL_ADDR, LSM303_MAG_ADDR);
+    MPU_6050_init(MPU_6050_ADDR);
+    
+    MPU_6050_check_sanity();
     lsm303_check_sanity();
-
+    
     while (1) {
         if (millis() - last_millis > MAX_LOOP_TIME_DIFF_ms) {
 
@@ -110,6 +115,19 @@ int main(int argc, char** argv) {
 
             can_msg_t imu_msg;
             build_imu_data_msg(MSG_SENSOR_ACC, millis(), data, &imu_msg);
+            txb_enqueue(&imu_msg);
+        }
+        if (millis() - last_accel2_millis > 50) {
+            last_accel2_millis = millis();
+            int16_t accelData[3];
+            MPU_6050_get_accel(accelData, accelData + 1, accelData + 2);
+            
+            int16_t gyroData[3];
+            MPU_6050_get_accel(gyroData, gyroData + 1, gyroData + 2);
+
+            can_msg_t imu_msg;
+            build_imu_data_msg(MSG_SENSOR_ACC, millis(), accelData, &imu_msg);
+            build_imu_data_msg(MSG_SENSOR_ACC, millis(), gyroData, &imu_msg);
             txb_enqueue(&imu_msg);
         }
 

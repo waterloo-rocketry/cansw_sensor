@@ -39,8 +39,8 @@ bool lsm303_init(uint8_t accel_addr_in, uint8_t mag_addr_in) {
 }
 
 bool lsm303_check_sanity(void) {
-    uint8_t accel_sanity = MY2C_read1ByteRegister(accel_addr, WHO_AM_I_A);
-    uint8_t mag_sanity = MY2C_read1ByteRegister(mag_addr, WHO_AM_I_M);
+    uint8_t accel_sanity = MY2C_read1ByteRegister(accel_addr, LSM_WHO_AM_I);
+    uint8_t mag_sanity = MY2C_read1ByteRegister(mag_addr, LSM_WHO_AM_I);
 
     // Sanity fails if the "who am i" registers don't match
     if (accel_sanity != 0x33 || mag_sanity != 0x40) {
