@@ -5,7 +5,8 @@
 
 // Contains miscellaneous sensor board-specific code
 
-#define MAX_LOOP_TIME_DIFF_ms 250
+#define MAX_LOOP_TIME_DIFF_ms 600
+#define MAX_LOOP_SENSOR_TIME_DIFF_ms 200
 
 #define LED_ON() (LATB4 = 0)
 #define LED_OFF() (LATB4 = 1)

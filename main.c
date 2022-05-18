@@ -98,17 +98,17 @@ int main(int argc, char** argv) {
             last_millis = millis();
         }
 
-        if (millis() - last_baro_millis > 50) {
+        if (millis() - last_baro_millis > MAX_LOOP_SENSOR_TIME_DIFF_ms) {
             last_baro_millis = millis();
             double temperature, pressure;
             baro_read(&temperature, &pressure);
-            // Temp is in hundredths of a degree, pressure in hundredths of a millibar
+            // Temp is in hundredths of a degree, pressure in tenth of a millibar
 
             can_msg_t baro_msg;
             build_analog_data_msg(millis(), SENSOR_BARO, (uint16_t)(pressure / 10), &baro_msg);
             txb_enqueue(&baro_msg);
         }
-        if (millis() - last_accel_millis > 50) {
+        if (millis() - last_accel_millis > MAX_LOOP_SENSOR_TIME_DIFF_ms) {
             last_accel_millis = millis();
             int16_t data[3];
             lsm303_get_accel_raw(data, data + 1, data + 2);
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
             build_imu_data_msg(MSG_SENSOR_ACC, millis(), data, &imu_msg);
             txb_enqueue(&imu_msg);
         }
-        if (millis() - last_accel2_millis > 50) {
+        if (millis() - last_accel2_millis > MAX_LOOP_SENSOR_TIME_DIFF_ms) {
             last_accel2_millis = millis();
             int16_t accelData[3];
             MPU_6050_get_accel(accelData, accelData + 1, accelData + 2);
@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
 
             can_msg_t imu_msg;
             build_imu_data_msg(MSG_SENSOR_ACC, millis(), accelData, &imu_msg);
-            build_imu_data_msg(MSG_SENSOR_ACC, millis(), gyroData, &imu_msg);
+            build_imu_data_msg(MSG_SENSOR_GYRO, millis(), gyroData, &imu_msg);
             txb_enqueue(&imu_msg);
         }
 
