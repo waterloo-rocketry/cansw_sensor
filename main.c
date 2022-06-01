@@ -110,25 +110,35 @@ int main(int argc, char** argv) {
         }
         if (millis() - last_accel_millis > MAX_LOOP_SENSOR_TIME_DIFF_ms) {
             last_accel_millis = millis();
-            int16_t data[3];
-            lsm303_get_accel_raw(data, data + 1, data + 2);
+            int16_t accelData[3];
+            lsm303_get_accel_raw(accelData, accelData + 1, accelData + 2);
+
+            int16_t magData[3];
+            lsm303_get_mag_raw(magData, magData + 1, magData + 2);
 
             can_msg_t imu_msg;
-            build_imu_data_msg(MSG_SENSOR_ACC, millis(), data, &imu_msg);
+            can_msg_t imu_msg2;
+            build_imu_data_msg(MSG_SENSOR_ACC, millis(), accelData, &imu_msg);
             txb_enqueue(&imu_msg);
+
+            build_imu_data_msg(MSG_SENSOR_MAG, millis(), magData, &imu_msg2);
+            txb_enqueue(&imu_msg2);
         }
         if (millis() - last_accel2_millis > MAX_LOOP_SENSOR_TIME_DIFF_ms) {
             last_accel2_millis = millis();
             int16_t accelData[3];
             MPU_6050_get_accel(accelData, accelData + 1, accelData + 2);
-            
+
             int16_t gyroData[3];
-            MPU_6050_get_accel(gyroData, gyroData + 1, gyroData + 2);
+            MPU_6050_get_gyro(gyroData, gyroData + 1, gyroData + 2);
 
             can_msg_t imu_msg;
-            build_imu_data_msg(MSG_SENSOR_ACC, millis(), accelData, &imu_msg);
-            build_imu_data_msg(MSG_SENSOR_GYRO, millis(), gyroData, &imu_msg);
+            can_msg_t imu_msg2;
+            build_imu_data_msg(MSG_SENSOR_ACC2, millis(), accelData, &imu_msg);
             txb_enqueue(&imu_msg);
+
+            build_imu_data_msg(MSG_SENSOR_GYRO, millis(), gyroData, &imu_msg2);
+            txb_enqueue(&imu_msg2);
         }
 
         //send any queued CAN messages
