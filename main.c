@@ -57,11 +57,11 @@ int main(int argc, char** argv) {
     // set up CAN tx buffer
     txb_init(tx_pool, sizeof(tx_pool), can_send, can_send_rdy);
 
-    // loop timer
+    // loop timer with offsets
     uint32_t last_millis = millis();
-    uint32_t last_baro_millis = millis();
-    uint32_t last_accel_millis = millis();
-    uint32_t last_accel2_millis = millis();
+    uint32_t last_baro_millis = millis() + 25;
+    uint32_t last_accel_millis = millis() + 50;
+    uint32_t last_accel2_millis = millis() + 75;
 
     MY2C_init();
     baro_init(BARO_ADDR);
@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
             int16_t accelData[3];
             lsm303_get_accel_raw(accelData, accelData + 1, accelData + 2);
 
-            int16_t magData[3];
+            int16_t magData[3]; //Magnetometer Data
             lsm303_get_mag_raw(magData, magData + 1, magData + 2);
 
             can_msg_t imu_msg;
