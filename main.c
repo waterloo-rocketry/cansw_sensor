@@ -80,15 +80,16 @@ int main(int argc, char** argv) {
             if (status_ok) { send_status_ok(); }
 
             // get pressure
-            uint16_t pressure_psi = get_pressure_psi();
             can_msg_t sensor_msg;
+            
+            uint16_t temperature_c = get_temperature_c();
 
-#ifdef SENSOR_BOARD_INJECTOR
-            enum SENSOR_ID sensor_id = SENSOR_PRESSURE_CC;
-#else
-            enum SENSOR_ID sensor_id = SENSOR_PRESSURE_OX;
-#endif
-            build_analog_data_msg(millis(), sensor_id, pressure_psi, &sensor_msg);
+            build_analog_data_msg(millis(), SENSOR_VENT_TEMP, temperature_c, &sensor_msg);
+            txb_enqueue(&sensor_msg);
+            
+            uint16_t pressure_psi = get_pressure_psi();
+
+            build_analog_data_msg(millis(), PT_SENSOR_ID, pressure_psi, &sensor_msg);
             txb_enqueue(&sensor_msg);
 
             // visual heartbeat indicator

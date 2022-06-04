@@ -24,6 +24,7 @@ void LED_heartbeat(void) {
 
 uint32_t get_pressure_psi(void) {
     adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_PRESSURE);
+    return voltage_raw;
 
     // Resistor divider maps 0-5V output to 0-1.5V
     int voltage_5v = voltage_raw * 5 / 6;
@@ -37,4 +38,11 @@ uint32_t get_pressure_psi(void) {
     if (pressure_psi < 0) { pressure_psi = 0; }
 
     return (uint32_t)pressure_psi;
+}
+
+
+uint16_t get_temperature_c(void) {
+    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_THERM);
+
+    return voltage_raw;
 }

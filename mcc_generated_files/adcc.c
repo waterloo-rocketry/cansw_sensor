@@ -99,11 +99,11 @@ void ADCC_Initialize(void)
     // ADMATH registers not updated; 
     ADSTAT = 0x00;
     // ADNREF VSS; ADPREF FVR; 
-    ADREF = 0x03;
+    ADREF = 0x00;
     // ADACT disabled; 
     ADACT = 0x00;
     // ADCS FOSC/2; 
-    ADCLK = 0x00;
+    ADCLK = 0b111;
     // ADGO stop; ADFM right; ADON enabled; ADCS FOSC/ADCLK; ADCONT disabled; 
     ADCON0 = 0x84;
     
