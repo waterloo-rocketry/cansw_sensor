@@ -3,6 +3,7 @@
 
 #include "mcc_generated_files/adcc.h"
 #include "mcc_generated_files/device_config.h"
+#include <math.h>
 
 #include "sensor_general.h"
 
@@ -44,5 +45,13 @@ uint32_t get_pressure_psi(void) {
 uint16_t get_temperature_c(void) {
     adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_THERM);
 
-    return voltage_raw;
+    const float beta = 3434.0;
+    const float invBeta = 1.0 / beta;
+    const float adcMax = 4096.0;
+    const float invT0 = 1.00 / 298.15;   // room temp in Kelvin
+    float K, C;
+    K = 1.00 / (invT0 + invBeta*(log ( adcMax / (float) voltage_raw - 1.00)));
+    C = K - 273.15 // convert to Celsius
+  
+    return (uint16_t) C;
 }
