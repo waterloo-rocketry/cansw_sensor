@@ -57,10 +57,10 @@ uint16_t get_temperature_c(void) {
     const float beta = 3434.0;
     const float invBeta = 1.0 / beta;
     const float adcMax = 4096.0;
-    const float invT0 = 1.00 / 298.15;   // room temp in Kelvin
+    const float invT0 = 1.0 / 298.15; // room temp in Kelvin
     float K, C;
-    K = 1.00 / (invT0 + invBeta*(log ( adcMax / (float) voltage_raw - 1.00)));
-    C = K - 273.15 // convert to Celsius
+    K = 1.0 / (invT0 + invBeta*(log(adcMax / (float) voltage_raw - 1.0)));
+    C = K - 273.15; // convert to Celsius
   
     return (uint16_t) C;
 }
