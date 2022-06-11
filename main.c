@@ -21,6 +21,9 @@
 #include "MPU_6050.h"
 #include <xc.h>
 
+#define BASIC_SENSOR_TIME_DIFF_ms 500
+#define IMU_SENSOR_TIME_DIFF_ms 100
+
 static void can_msg_handler(const can_msg_t *msg);
 static void send_status_ok(void);
 
@@ -59,9 +62,7 @@ int main(int argc, char** argv) {
 
     // loop timer with offsets
     uint32_t last_millis = millis();
-    uint32_t last_baro_millis = millis() + 25;
-    uint32_t last_accel_millis = millis() + 50;
-    uint32_t last_accel2_millis = millis() + 75;
+    uint32_t last_accel_millis = millis();
 
     MY2C_init();
     baro_init(BARO_ADDR);
@@ -72,7 +73,7 @@ int main(int argc, char** argv) {
     lsm303_check_sanity();
     
     while (1) {
-        if (millis() - last_millis > MAX_LOOP_TIME_DIFF_ms) {
+        if (millis() - last_millis > BASIC_SENSOR_TIME_DIFF_ms) {
 
             // check for general board status
             bool status_ok = true;
@@ -91,6 +92,12 @@ int main(int argc, char** argv) {
 
             build_analog_data_msg(millis(), PT_SENSOR_ID, pressure_psi, &sensor_msg);
             txb_enqueue(&sensor_msg);
+            double temperature, pressure;
+            baro_read(&temperature, &pressure);
+            // Temp is in hundredths of a degree, pressure in tenth of a millibar
+            //can_msg_t sensor_msg;
+            build_analog_data_msg(millis(), SENSOR_BARO, (uint16_t)(pressure / 10), &sensor_msg);
+            txb_enqueue(&sensor_msg);
 
             // visual heartbeat indicator
             LED_heartbeat();
@@ -99,47 +106,27 @@ int main(int argc, char** argv) {
             last_millis = millis();
         }
 
-        if (millis() - last_baro_millis > MAX_LOOP_SENSOR_TIME_DIFF_ms) {
-            last_baro_millis = millis();
-            double temperature, pressure;
-            baro_read(&temperature, &pressure);
-            // Temp is in hundredths of a degree, pressure in tenth of a millibar
-
-            can_msg_t baro_msg;
-            build_analog_data_msg(millis(), SENSOR_BARO, (uint16_t)(pressure / 10), &baro_msg);
-            txb_enqueue(&baro_msg);
-        }
-        if (millis() - last_accel_millis > MAX_LOOP_SENSOR_TIME_DIFF_ms) {
+        if (millis() - last_accel_millis > IMU_SENSOR_TIME_DIFF_ms) {
             last_accel_millis = millis();
-            int16_t accelData[3];
-            lsm303_get_accel_raw(accelData, accelData + 1, accelData + 2);
-
-            int16_t magData[3]; //Magnetometer Data
-            lsm303_get_mag_raw(magData, magData + 1, magData + 2);
-
+            
+            int16_t imuData[3];
             can_msg_t imu_msg;
-            can_msg_t imu_msg2;
-            build_imu_data_msg(MSG_SENSOR_ACC, millis(), accelData, &imu_msg);
+            
+            lsm303_get_accel_raw(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_ACC, millis(), imuData, &imu_msg);
             txb_enqueue(&imu_msg);
 
-            build_imu_data_msg(MSG_SENSOR_MAG, millis(), magData, &imu_msg2);
-            txb_enqueue(&imu_msg2);
-        }
-        if (millis() - last_accel2_millis > MAX_LOOP_SENSOR_TIME_DIFF_ms) {
-            last_accel2_millis = millis();
-            int16_t accelData[3];
-            MPU_6050_get_accel(accelData, accelData + 1, accelData + 2);
-
-            int16_t gyroData[3];
-            MPU_6050_get_gyro(gyroData, gyroData + 1, gyroData + 2);
-
-            can_msg_t imu_msg;
-            can_msg_t imu_msg2;
-            build_imu_data_msg(MSG_SENSOR_ACC2, millis(), accelData, &imu_msg);
+            lsm303_get_mag_raw(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_MAG, millis(), imuData, &imu_msg);
             txb_enqueue(&imu_msg);
-
-            build_imu_data_msg(MSG_SENSOR_GYRO, millis(), gyroData, &imu_msg2);
-            txb_enqueue(&imu_msg2);
+            
+            MPU_6050_get_accel(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_ACC2, millis(), imuData, &imu_msg);
+            txb_enqueue(&imu_msg);
+            
+            MPU_6050_get_gyro(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_GYRO, millis(), imuData, &imu_msg);
+            txb_enqueue(&imu_msg);
         }
 
         //send any queued CAN messages

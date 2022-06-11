@@ -30,13 +30,17 @@ uint32_t get_pressure_psi(void) {
 
     float v = (voltage_raw + 0.5f) / 4096.0f * VREF;
     
+#if 0
+    
     const double r = 99.8;
     const double pressure_range = 3000;
 
     double current = v / r;
 
     int32_t pressure_psi = (int32_t) ((current - 0.004) / (0.02 - 0.004) * pressure_range);
-    //if (pressure_psi < 0) { pressure_psi = 0; }
+#else
+    int32_t pressure_psi = (int32_t) (v * 54.9f - 34.2f);
+#endif
 
     return (uint32_t) pressure_psi;
 }
