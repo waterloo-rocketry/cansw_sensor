@@ -7,6 +7,9 @@
 
 #include "sensor_general.h"
 
+#define USE_2_40_mA_PRESSURE_SCALING 1
+#define USE_1_5_V_PRESSURE_SCALING 0
+
 const float VREF = 3.3;
 
 void LED_init(void) {
@@ -30,7 +33,7 @@ uint32_t get_pressure_psi(void) {
 
     float v = (voltage_raw + 0.5f) / 4096.0f * VREF;
     
-#if 0
+#if USE_2_40_mA_PRESSURE_SCALING
     
     const double r = 99.8;
     const double pressure_range = 3000;
@@ -39,7 +42,7 @@ uint32_t get_pressure_psi(void) {
 
     int32_t pressure_psi = (int32_t) ((current - 0.004) / (0.02 - 0.004) * pressure_range);
 #else
-    int32_t pressure_psi = (int32_t) (v * 54.9f - 34.2f);
+    int32_t pressure_psi = (int32_t) (v * 34.2f*3.0f - 34.2f);
 #endif
 
     return (uint32_t) pressure_psi;
