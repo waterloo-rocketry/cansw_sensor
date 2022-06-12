@@ -21,8 +21,12 @@
 #include "MPU_6050.h"
 #include <xc.h>
 
-#define BASIC_SENSOR_TIME_DIFF_ms 500
-#define IMU_SENSOR_TIME_DIFF_ms 100
+// Set any of these to zero to disable
+#define STATUS_TIME_DIFF_ms 500
+#define BARO_TIME_DIFF_ms 500
+#define IMU_TIME_DIFF_ms 0
+#define PRES_TIME_DIFF_ms 500
+#define TEMP_TIME_DIFF_ms 0
 
 static void can_msg_handler(const can_msg_t *msg);
 static void send_status_ok(void);
@@ -60,10 +64,6 @@ int main(int argc, char** argv) {
     // set up CAN tx buffer
     txb_init(tx_pool, sizeof(tx_pool), can_send, can_send_rdy);
 
-    // loop timer with offsets
-    uint32_t last_millis = millis();
-    uint32_t last_accel_millis = millis();
-
     MY2C_init();
     baro_init(BARO_ADDR);
     lsm303_init(LSM303_ACCEL_ADDR, LSM303_MAG_ADDR);
@@ -72,53 +72,47 @@ int main(int argc, char** argv) {
     MPU_6050_check_sanity();
     lsm303_check_sanity();
     
+    // loop timers
+    uint32_t last_status_millis = millis();
+    uint32_t last_baro_millis = millis();
+    uint32_t last_imu_millis = millis();
+    uint32_t last_pres_millis = millis();
+    uint32_t last_temp_millis = millis();
     while (1) {
-        if (millis() - last_millis > BASIC_SENSOR_TIME_DIFF_ms) {
-
-            // check for general board status
+        if (millis() - last_status_millis > STATUS_TIME_DIFF_ms) {
+            last_status_millis = millis();
+            
             bool status_ok = true;
             status_ok &= check_bus_current_error();
             if (status_ok) { send_status_ok(); }
-
-            // get pressure
-            can_msg_t sensor_msg;
             
-            uint16_t temperature_c = get_temperature_c();
-
-            build_analog_data_msg(millis(), SENSOR_VENT_TEMP, temperature_c, &sensor_msg);
-            txb_enqueue(&sensor_msg);
+            LED_heartbeat();
+        }
+#if BARO_TIME_DIFF_ms
+        if (millis() - last_baro_millis > BARO_TIME_DIFF_ms) {
+            last_baro_millis = millis();
             
-            uint16_t pressure_psi = get_pressure_psi();
-
-            build_analog_data_msg(millis(), PT_SENSOR_ID, pressure_psi, &sensor_msg);
-            txb_enqueue(&sensor_msg);
             double temperature, pressure;
             baro_read(&temperature, &pressure);
-            // Temp is in hundredths of a degree, pressure in tenth of a millibar
-            //can_msg_t sensor_msg;
+            
+            can_msg_t sensor_msg;
             build_analog_data_msg(millis(), SENSOR_BARO, (uint16_t)(pressure / 10), &sensor_msg);
             txb_enqueue(&sensor_msg);
-
-            // visual heartbeat indicator
-            LED_heartbeat();
-
-            // update our loop counter
-            last_millis = millis();
         }
-
-        if (millis() - last_accel_millis > IMU_SENSOR_TIME_DIFF_ms) {
-            last_accel_millis = millis();
-            
+#endif
+#if IMU_TIME_DIFF_ms
+        if (millis() - last_imu_millis > IMU_TIME_DIFF_ms) {
+            last_imu_millis = millis();
             int16_t imuData[3];
             can_msg_t imu_msg;
             
-            lsm303_get_accel_raw(imuData, imuData + 1, imuData + 2);
+            /*lsm303_get_accel_raw(imuData, imuData + 1, imuData + 2);
             build_imu_data_msg(MSG_SENSOR_ACC, millis(), imuData, &imu_msg);
             txb_enqueue(&imu_msg);
 
             lsm303_get_mag_raw(imuData, imuData + 1, imuData + 2);
             build_imu_data_msg(MSG_SENSOR_MAG, millis(), imuData, &imu_msg);
-            txb_enqueue(&imu_msg);
+            txb_enqueue(&imu_msg);*/
             
             MPU_6050_get_accel(imuData, imuData + 1, imuData + 2);
             build_imu_data_msg(MSG_SENSOR_ACC2, millis(), imuData, &imu_msg);
@@ -128,7 +122,30 @@ int main(int argc, char** argv) {
             build_imu_data_msg(MSG_SENSOR_GYRO, millis(), imuData, &imu_msg);
             txb_enqueue(&imu_msg);
         }
+#endif
+#if PRES_TIME_DIFF_ms
+        if (millis() - last_pres_millis > PRES_TIME_DIFF_ms) {
+            last_pres_millis = millis();
+            
+            uint16_t pressure_psi = get_pressure_psi();
 
+            can_msg_t sensor_msg;
+            build_analog_data_msg(millis(), PT_SENSOR_ID, pressure_psi, &sensor_msg);
+            txb_enqueue(&sensor_msg);
+        }
+#endif
+#if TEMP_TIME_DIFF_ms
+        if (millis() - last_temp_millis > TEMP_TIME_DIFF_ms) {
+            last_temp_millis = millis();
+            
+            uint16_t temperature_c = get_temperature_c();
+            
+            can_msg_t sensor_msg;
+            build_analog_data_msg(millis(), SENSOR_VENT_TEMP, temperature_c, &sensor_msg);
+            txb_enqueue(&sensor_msg);
+        }
+#endif
+        
         //send any queued CAN messages
         txb_heartbeat();
     }
