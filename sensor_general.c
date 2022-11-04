@@ -2,7 +2,15 @@
 #include <stdbool.h>
 
 #include "mcc_generated_files/adcc.h"
+#include "mcc_generated_files/device_config.h"
+#include <math.h>
+
 #include "sensor_general.h"
+
+#define USE_4_20_MA_SENSOR 0
+#define PT_OFFSET 2
+
+const float VREF = 3.3;
 
 void LED_init(void) {
     TRISB4 = 0;     //set B4 as output
@@ -23,17 +31,38 @@ void LED_heartbeat(void) {
 uint32_t get_pressure_psi(void) {
     adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_PRESSURE);
 
-    // Resistor divider maps 0-5V output to 0-1.5V
-    int voltage_5v = voltage_raw * 5 / 6;
+    float v = (voltage_raw + 0.5f) / 4096.0f * VREF;
+    
+#if USE_4_20_MA_SENSOR
+    
+    const double r = 99.8;
+    const double pressure_range = 3000;
 
-    // Scaling factors taken from (for P1):
-    // https://docs.google.com/spreadsheets/d/1NJDRvIkPtVGVRjQt-zyT8ZoKv0JL28MJ4FAHNd4Z_rc/edit#gid=0
-    int32_t pressure_add = (40); // adjusted scaling values from june 12th
-    double pressure_scale = (621.55265);
+    double current = v / r;
 
-    int32_t pressure_psi = (int32_t) voltage_5v * pressure_scale / (1000) + pressure_add;
-    if (pressure_psi < 0) { pressure_psi = 0; }
+    int32_t pressure_psi = (int32_t) ((current - 0.004) / (0.02 - 0.004) * pressure_range);
+#else
+    int32_t pressure_psi = (int32_t) (v * 39.2f*3.0f - 39.2f);
+#endif
 
-    return (uint32_t)pressure_psi;
+    return (uint32_t) pressure_psi + PT_OFFSET;
 }
 
+
+uint16_t get_temperature_c(void) {
+    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_THERM);
+
+    const float rdiv = 10000.0; // 10kohm dividor resistor
+
+    // beta, r0, t0 from https://media.digikey.com/pdf/Data%20Sheets/Thermometrics%20Global%20Business%20PDFs/TG_Series.pdf
+    const float beta = 3434.0;
+    const float r0 = 10000.0;
+    const float t0 = 298.15;   // 25 C in Kelvin
+
+    float v = (voltage_raw + 0.5f) / 4096.0f * VREF; // (raw + contiuity correction) / 12bit adc * vref
+    float r = v * rdiv / (VREF - v);
+
+    float invk = 1 / t0 + 1 / beta * log (r / r0);
+  
+    return (uint16_t) (1/invk - 273);
+}

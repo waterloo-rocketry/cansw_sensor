@@ -5,8 +5,6 @@
 
 // Contains miscellaneous sensor board-specific code
 
-#define MAX_LOOP_TIME_DIFF_ms 250
-
 #define LED_ON() (LATB4 = 0)
 #define LED_OFF() (LATB4 = 1)
 
@@ -20,6 +18,7 @@ void LED_heartbeat(void);
 // Read pressure sensor ADC and convert to PSI. Replace all negative values with
 // zero since canlib and RLCS don't like it.
 uint32_t get_pressure_psi(void);
+uint16_t get_temperature_c(void);
 
 #endif	/* SENSOR_GEN_H */
 

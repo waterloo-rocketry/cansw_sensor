@@ -105,11 +105,10 @@ void PIN_MANAGER_Initialize(void)
     // Enable IOCI interrupt 
     PIE0bits.IOCIE = 1; 
     
-	
     I2C1SDAPPS = 0x14;   //RC4->I2C1:SDA1;    
     RC3PPS = 0x21;   //RC3->I2C1:SCL1;    
     RC4PPS = 0x22;   //RC4->I2C1:SDA1;    
-    I2C1SCLPPS = 0x13;   //RC3->I2C1:SCL1;    
+    I2C1SCLPPS = 0x13;   //RC3->I2C1:SCL1;
 }
   
 void PIN_MANAGER_IOC(void)

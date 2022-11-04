@@ -8,7 +8,6 @@
 #include "canlib/util/timing_util.h"
 #include "canlib/util/can_tx_buffer.h"
 
-#include "mcc_generated_files/i2c1.h"
 #include "mcc_generated_files/mcc.h"
 #include "mcc_generated_files/adcc.h"
 #include "mcc_generated_files/pin_manager.h"
@@ -16,13 +15,24 @@
 #include "sensor_general.h"
 #include "timer.h"
 #include "error_checks.h"
+#include "baro.h"
+#include "my2c.h"
+#include "lsm303agr.h"
+#include "MPU_6050.h"
 #include <xc.h>
+
+// Set any of these to zero to disable
+#define STATUS_TIME_DIFF_ms 500
+#define BARO_TIME_DIFF_ms 500
+#define IMU_TIME_DIFF_ms 0
+#define PRES_TIME_DIFF_ms 500
+#define TEMP_TIME_DIFF_ms 0
 
 static void can_msg_handler(const can_msg_t *msg);
 static void send_status_ok(void);
 
 //memory pool for the CAN tx buffer
-uint8_t tx_pool[100];
+uint8_t tx_pool[200];
 
 int main(int argc, char** argv) {
     // MCC generated initializer
@@ -54,36 +64,88 @@ int main(int argc, char** argv) {
     // set up CAN tx buffer
     txb_init(tx_pool, sizeof(tx_pool), can_send, can_send_rdy);
 
-    // loop timer
-    uint32_t last_millis = millis();
-
+    MY2C_init();
+    baro_init(BARO_ADDR);
+    lsm303_init(LSM303_ACCEL_ADDR, LSM303_MAG_ADDR);
+    MPU_6050_init(MPU_6050_ADDR);
+    
+    MPU_6050_check_sanity();
+    lsm303_check_sanity();
+    
+    // loop timers
+    uint32_t last_status_millis = millis();
+    uint32_t last_baro_millis = millis();
+    uint32_t last_imu_millis = millis();
+    uint32_t last_pres_millis = millis();
+    uint32_t last_temp_millis = millis();
     while (1) {
-        if (millis() - last_millis > MAX_LOOP_TIME_DIFF_ms) {
-
-            // check for general board status
+        if (millis() - last_status_millis > STATUS_TIME_DIFF_ms) {
+            last_status_millis = millis();
+            
             bool status_ok = true;
             status_ok &= check_bus_current_error();
             if (status_ok) { send_status_ok(); }
-
-            // get pressure
-            uint16_t pressure_psi = get_pressure_psi();
-            can_msg_t sensor_msg;
-
-#ifdef SENSOR_BOARD_INJECTOR
-            enum SENSOR_ID sensor_id = SENSOR_PRESSURE_CC;
-#else
-            enum SENSOR_ID sensor_id = SENSOR_PRESSURE_OX;
-#endif
-            build_analog_data_msg(millis(), sensor_id, pressure_psi, &sensor_msg);
-            txb_enqueue(&sensor_msg);
-
-            // visual heartbeat indicator
+            
             LED_heartbeat();
-
-            // update our loop counter
-            last_millis = millis();
         }
+#if BARO_TIME_DIFF_ms
+        if (millis() - last_baro_millis > BARO_TIME_DIFF_ms) {
+            last_baro_millis = millis();
+            
+            double temperature, pressure;
+            baro_read(&temperature, &pressure);
+            
+            can_msg_t sensor_msg;
+            build_analog_data_msg(millis(), SENSOR_BARO, (uint16_t)(pressure / 10), &sensor_msg);
+            txb_enqueue(&sensor_msg);
+        }
+#endif
+#if IMU_TIME_DIFF_ms
+        if (millis() - last_imu_millis > IMU_TIME_DIFF_ms) {
+            last_imu_millis = millis();
+            int16_t imuData[3];
+            can_msg_t imu_msg;
+            
+            /*lsm303_get_accel_raw(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_ACC, millis(), imuData, &imu_msg);
+            txb_enqueue(&imu_msg);
 
+            lsm303_get_mag_raw(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_MAG, millis(), imuData, &imu_msg);
+            txb_enqueue(&imu_msg);*/
+            
+            MPU_6050_get_accel(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_ACC2, millis(), imuData, &imu_msg);
+            txb_enqueue(&imu_msg);
+            
+            MPU_6050_get_gyro(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_GYRO, millis(), imuData, &imu_msg);
+            txb_enqueue(&imu_msg);
+        }
+#endif
+#if PRES_TIME_DIFF_ms
+        if (millis() - last_pres_millis > PRES_TIME_DIFF_ms) {
+            last_pres_millis = millis();
+            
+            uint16_t pressure_psi = get_pressure_psi();
+
+            can_msg_t sensor_msg;
+            build_analog_data_msg(millis(), PT_SENSOR_ID, pressure_psi, &sensor_msg);
+            txb_enqueue(&sensor_msg);
+        }
+#endif
+#if TEMP_TIME_DIFF_ms
+        if (millis() - last_temp_millis > TEMP_TIME_DIFF_ms) {
+            last_temp_millis = millis();
+            
+            uint16_t temperature_c = get_temperature_c();
+            
+            can_msg_t sensor_msg;
+            build_analog_data_msg(millis(), SENSOR_VENT_TEMP, temperature_c, &sensor_msg);
+            txb_enqueue(&sensor_msg);
+        }
+#endif
+        
         //send any queued CAN messages
         txb_heartbeat();
     }
@@ -107,7 +169,7 @@ static void __interrupt() interrupt_handler() {
 
 static void can_msg_handler(const can_msg_t *msg) {
     uint16_t msg_type = get_message_type(msg);
-
+    int dest_id = -1;
     // ignore messages that were sent from this board
     if (get_board_unique_id(msg) == BOARD_UNIQUE_ID) {
         return;
@@ -126,23 +188,14 @@ static void can_msg_handler(const can_msg_t *msg) {
             LED_OFF();
             break;
 
-        // all the other ones - do nothing
-        case MSG_INJ_VALVE_CMD:
-        case MSG_VENT_VALVE_CMD:
-        case MSG_DEBUG_MSG:
-        case MSG_DEBUG_PRINTF:
-        case MSG_VENT_VALVE_STATUS:
-        case MSG_INJ_VALVE_STATUS:
-        case MSG_SENSOR_ACC:
-        case MSG_SENSOR_GYRO:
-        case MSG_SENSOR_MAG:
-        case MSG_SENSOR_ANALOG:
-        case MSG_GENERAL_BOARD_STATUS:
+        case MSG_RESET_CMD:
+            dest_id = get_reset_board_id(msg);
+            if (dest_id == BOARD_UNIQUE_ID || dest_id == 0 ){
+                RESET();
+            }
             break;
-
-        // illegal message type - should never get here
+        // all the other ones - do nothing
         default:
-            // send a message or something
             break;
     }
 }
