@@ -26,11 +26,13 @@
         <itemPath>mcc_generated_files/device_config.h</itemPath>
         <itemPath>mcc_generated_files/mcc.h</itemPath>
         <itemPath>mcc_generated_files/fvr.h</itemPath>
+        <itemPath>mcc_generated_files/interrupt_manager.h</itemPath>
       </logicalFolder>
       <itemPath>timer.h</itemPath>
       <itemPath>sensor_general.h</itemPath>
       <itemPath>my2c.h</itemPath>
       <itemPath>baro.h</itemPath>
+      <itemPath>ICM-20948.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -47,6 +49,7 @@
         <itemPath>mcc_generated_files/device_config.c</itemPath>
         <itemPath>mcc_generated_files/mcc.c</itemPath>
         <itemPath>mcc_generated_files/pin_manager.c</itemPath>
+        <itemPath>mcc_generated_files/interrupt_manager.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
       <itemPath>timer.c</itemPath>
@@ -56,6 +59,7 @@
       <itemPath>error_checks.c</itemPath>
       <itemPath>my2c.c</itemPath>
       <itemPath>MPU_6050.c</itemPath>
+      <itemPath>ICM-20948.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

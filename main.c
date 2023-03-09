@@ -19,6 +19,7 @@
 #include "my2c.h"
 #include "lsm303agr.h"
 #include "MPU_6050.h"
+#include "ICM-20948.h"
 #include <xc.h>
 
 // Set any of these to zero to disable
@@ -48,13 +49,13 @@ int main(int argc, char** argv) {
     INTCON0bits.GIE = 1;
 
     // Set up CAN TX
-    TRISC6 = 0;
-    RC6PPS = 0x33;
+    TRISC1 = 0;
+    RC1PPS = 0x33;
 
     // Set up CAN RX
-    TRISC5 = 1;
-    ANSELC5 = 0;
-    CANRXPPS = 0x15;
+    TRISC0 = 1;
+    ANSELC0 = 0;
+    CANRXPPS = 0x10;
 
     // set up CAN module
     can_timing_t can_setup;
@@ -66,11 +67,13 @@ int main(int argc, char** argv) {
 
     MY2C_init();
     baro_init(BARO_ADDR);
-    lsm303_init(LSM303_ACCEL_ADDR, LSM303_MAG_ADDR);
-    MPU_6050_init(MPU_6050_ADDR);
+    // lsm303_init(LSM303_ACCEL_ADDR, LSM303_MAG_ADDR);
+    // MPU_6050_init(MPU_6050_ADDR);
+    ICM_20948_init(ICM_20948_ADDR);
     
-    MPU_6050_check_sanity();
-    lsm303_check_sanity();
+    // MPU_6050_check_sanity();
+    // lsm303_check_sanity();
+    ICM_20948_check_sanity();
     
     // loop timers
     uint32_t last_status_millis = millis();
@@ -106,19 +109,36 @@ int main(int argc, char** argv) {
             int16_t imuData[3];
             can_msg_t imu_msg;
             
-            /*lsm303_get_accel_raw(imuData, imuData + 1, imuData + 2);
+            ICM_20948_get_accel_raw(imuData, imuData + 1, imuData + 2);
             build_imu_data_msg(MSG_SENSOR_ACC, millis(), imuData, &imu_msg);
             txb_enqueue(&imu_msg);
 
-            lsm303_get_mag_raw(imuData, imuData + 1, imuData + 2);
+            ICM_20948_get_mag_raw(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_MAG, millis(), imuData, &imu_msg);
+            txb_enqueue(&imu_msg);
+
+            ICM_20948_get_gyro(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_GYRO, millis(), imuData, &imu_msg);
+            txb_enqueue(&imu_msg);
+            
+            
+            
+            
+            // old accelerometer/gyroscopes/magnetometers
+            
+            // *lsm303_get_accel_raw(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_ACC, millis(), imuData, &imu_msg);
+            txb_enqueue(&imu_msg);
+
+            // lsm303_get_mag_raw(imuData, imuData + 1, imuData + 2);
             build_imu_data_msg(MSG_SENSOR_MAG, millis(), imuData, &imu_msg);
             txb_enqueue(&imu_msg);*/
             
-            MPU_6050_get_accel(imuData, imuData + 1, imuData + 2);
+            // MPU_6050_get_accel(imuData, imuData + 1, imuData + 2);
             build_imu_data_msg(MSG_SENSOR_ACC2, millis(), imuData, &imu_msg);
             txb_enqueue(&imu_msg);
             
-            MPU_6050_get_gyro(imuData, imuData + 1, imuData + 2);
+            // MPU_6050_get_gyro(imuData, imuData + 1, imuData + 2);
             build_imu_data_msg(MSG_SENSOR_GYRO, millis(), imuData, &imu_msg);
             txb_enqueue(&imu_msg);
         }
