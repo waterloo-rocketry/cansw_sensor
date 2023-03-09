@@ -19,11 +19,11 @@ bool ICM_20948_init(uint8_t ICM_20948_addr_in) {
     MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_2, 0x00);
     
     // Select user bank 2
-    MY2C_write1ByteRegister(ICM_20948_addr, REG_BANK_SEL, 0x00100000);
+    MY2C_write1ByteRegister(ICM_20948_addr, REG_BANK_SEL, 0x20);
     // Set gyroscope full scale to +/-2000dps, rate = 9000 Hz
-    MY2C_write1ByteRegister(ICM_20948_addr, GYRO_CONFIG_1, 0x00000110);
+    MY2C_write1ByteRegister(ICM_20948_addr, GYRO_CONFIG_1, 0x06);
     // Set accelerometer full scale to +/- 16g, rate = 4500 Hz
-    MY2C_write1ByteRegister(ICM_20948_addr, ACCEL_CONFIG, 0x00000110);
+    MY2C_write1ByteRegister(ICM_20948_addr, ACCEL_CONFIG, 0x06);
     // Reset magnetometer & set to continuous measurement mode 
     MY2C_write1ByteRegister(ICM_20948_addr, CNTL3, 0x01);
     MY2C_write1ByteRegister(ICM_20948_addr, CNTL2, 0x02);
