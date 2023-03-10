@@ -1,3 +1,6 @@
+#ifndef LSM303AGR_H
+#define LSM303AGR_H
+
 #include "mcc_generated_files/device_config.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -28,14 +31,15 @@ bool ICM_20948_init(uint8_t ICM_20948_addr_in) {
     MY2C_write1ByteRegister(ICM_20948_addr, CNTL3, 0x01);
     MY2C_write1ByteRegister(ICM_20948_addr, CNTL2, 0x02);
     
-    return true
+    return true;
 }
 
 bool ICM_20948_check_sanity(void) {
     uint8_t addr_sanity = MY2C_read1ByteRegister(ICM_20948_addr, WHO_AM_I);
-
+    uint8_t mag_addr_sanity = MY2C_read1ByteRegister(ICM_20948_addr, WIA2);
+    
     // Sanity fails if the "who am i" registers doesn't match
-    if (addr_sanity != 0xEA) {
+    if (addr_sanity != 0xEA || mag_addr_sanity != 0x09) {
         return false;
     }
 
@@ -46,6 +50,16 @@ bool ICM_20948_check_sanity(void) {
 bool ICM_20948_get_accel_raw(int16_t *x, int16_t *y, int16_t *z) {
     if (!x || !y || !z) { return false; }
 
+    // Check if magnetometer data is ready, fail if it is not
+    uint8_t mag_data_status_1 = MY2C_read1ByteRegister(ICM_20948_addr, ST1);
+    
+    if (mag_data_status_1 != 0x01 || mag_data_status_1!= 0x03) {
+        TRISB3 = 0;     //set B3 as output, blue LED
+        LATB3 = 0;      // turn blue LED on
+        return false;
+    }
+    
+    // Magnetometer measurement data
     uint8_t x_h = MY2C_read1ByteRegister(ICM_20948_addr, ACCEL_XOUT_H);
     uint8_t x_l = MY2C_read1ByteRegister(ICM_20948_addr, ACCEL_XOUT_L);
     *x = (int16_t)((uint16_t)x_h << 8 | x_l);
@@ -58,6 +72,8 @@ bool ICM_20948_get_accel_raw(int16_t *x, int16_t *y, int16_t *z) {
     uint8_t z_l = MY2C_read1ByteRegister(ICM_20948_addr, ACCEL_ZOUT_L);
     *z = (int16_t)((uint16_t)z_h << 8 | z_l);
 
+    // Must read ST2 register after measurement, see datasheet register 13.4 ST2
+    uint8_t mag_status_2 = MY2C_read1ByteRegister(ICM_20948_addr, ST2);
     return true; 
 }
 
@@ -74,6 +90,24 @@ bool ICM_20948_get_gyro_raw(int16_t *x, int16_t *y, int16_t *z) {
 
     uint8_t z_h = MY2C_read1ByteRegister(ICM_20948_addr, GYRO_ZOUT_H);
     uint8_t z_l = MY2C_read1ByteRegister(ICM_20948_addr, GYRO_ZOUT_L);
+    *z = (int16_t)((uint16_t)z_h << 8 | z_l);
+
+    return true;
+}
+
+bool ICM_20948_get_mag_raw(int16_t *x, int16_t *y, int16_t *z) {
+    if (!x || !y || !z) { return false; }
+    
+    uint8_t x_h = MY2C_read1ByteRegister(ICM_20948_addr, HXH);
+    uint8_t x_l = MY2C_read1ByteRegister(ICM_20948_addr, HXL);
+    *x = (int16_t)((uint16_t)x_h << 8 | x_l);
+
+    uint8_t y_h = MY2C_read1ByteRegister(ICM_20948_addr, HYH);
+    uint8_t y_l = MY2C_read1ByteRegister(ICM_20948_addr, HYL);
+    *y = (int16_t)((uint16_t)y_h << 8 | y_l);
+
+    uint8_t z_h = MY2C_read1ByteRegister(ICM_20948_addr, HZH);
+    uint8_t z_l = MY2C_read1ByteRegister(ICM_20948_addr, HZL);
     *z = (int16_t)((uint16_t)z_h << 8 | z_l);
 
     return true;

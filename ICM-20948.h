@@ -3,7 +3,7 @@
 
 #define ICM_20948_ADDR 0x69
 
-#include <stint.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 // Set up gyroscope, accelerometer, and magnetometer
@@ -17,6 +17,8 @@ bool ICM_20948_check_sanity(void);
 bool ICM_20948_get_accel_raw(int16_t *x, int16_t *y, int16_t *z);
 
 bool ICM_20948_get_gyro_raw(int16_t *x, int16_t *y, int16_t *z);
+
+bool ICM_20948_get_mag_raw(int16_t *x, int16_t *y, int16_t *z);
 
 bool ICM_20948_get_temp_raw(int16_t *temp);
 

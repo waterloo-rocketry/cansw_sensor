@@ -1,7 +1,7 @@
 #ifndef LSM303AGR_H
 #define LSM303AGR_H
 
-#define LSM303_ACCEL_ADDR 
+#define MPU_6050_ADDR
 
 #include "mcc_generated_files/device_config.h"
 #include <stdint.h>

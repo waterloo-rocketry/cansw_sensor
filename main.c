@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
             
             
             
-            // old accelerometer/gyroscopes/magnetometers
+            // old IMUs
             
             // *lsm303_get_accel_raw(imuData, imuData + 1, imuData + 2);
             build_imu_data_msg(MSG_SENSOR_ACC, millis(), imuData, &imu_msg);

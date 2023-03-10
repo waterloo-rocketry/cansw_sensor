@@ -109,7 +109,7 @@
 #define YG_OFFS_USRL 0x06
 
 #define ZG_OFFS_USRH 0x07
-#define ZG_OFFS_USRL 0x08
+//#define ZG_OFFS_USRL 0x08
 
 #define ODR_ALIGN_EN 0x09
 #define ACCEL_SMPLRT_DIV_1 0x10
