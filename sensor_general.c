@@ -28,10 +28,10 @@ void LED_heartbeat(void) {
     }
 }
 
-uint32_t get_pressure_psi(void) {
-    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_PRESSURE);
+ uint32_t get_pressure_psi(void) {
+     adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_4);
 
-    float v = (voltage_raw + 0.5f) / 4096.0f * VREF;
+     float v = (voltage_raw + 0.5f) / 4096.0f * VREF;
     
 #if USE_4_20_MA_SENSOR
     
@@ -46,11 +46,11 @@ uint32_t get_pressure_psi(void) {
 #endif
 
     return (uint32_t) pressure_psi + PT_OFFSET;
-}
 
+ }
 
 uint16_t get_temperature_c(void) {
-    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_THERM);
+    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_3);
 
     const float rdiv = 10000.0; // 10kohm dividor resistor
 

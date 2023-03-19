@@ -17,6 +17,7 @@
 #include "error_checks.h"
 #include "baro.h"
 #include "my2c.h"
+#include "ICM-20948.h"
 #include <xc.h>
 
 // Set any of these to zero to disable
@@ -46,13 +47,13 @@ int main(int argc, char** argv) {
     INTCON0bits.GIE = 1;
 
     // Set up CAN TX
-    TRISC6 = 0;
-    RC6PPS = 0x33;
+    TRISC1 = 0;
+    RC1PPS = 0x33;
 
     // Set up CAN RX
-    TRISC5 = 1;
-    ANSELC5 = 0;
-    CANRXPPS = 0x15;
+    TRISC0 = 1;
+    ANSELC0 = 0;
+    CANRXPPS = 0x10;
 
     // set up CAN module
     can_timing_t can_setup;
@@ -65,8 +66,8 @@ int main(int argc, char** argv) {
     MY2C_init();
     baro_init(BARO_ADDR);
     
-    // Add new IMU init here
-    // Add new IMU sanity check here
+    ICM_20948_init(ICM_20948_ADDR);
+    ICM_20948_check_sanity();
     
     // loop timers
     uint32_t last_status_millis = millis();
@@ -102,7 +103,17 @@ int main(int argc, char** argv) {
             int16_t imuData[3];
             can_msg_t imu_msg;
             
-            // Add new IMU code here
+            ICM_20948_get_accel_raw(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_ACC, millis(), imuData, &imu_msg);
+            txb_enqueue(&imu_msg);
+
+            ICM_20948_get_mag_raw(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_MAG, millis(), imuData, &imu_msg);
+            txb_enqueue(&imu_msg);
+
+            ICM_20948_get_gyro(imuData, imuData + 1, imuData + 2);
+            build_imu_data_msg(MSG_SENSOR_GYRO, millis(), imuData, &imu_msg);
+            txb_enqueue(&imu_msg);
         }
 #endif
 #if PRES_TIME_DIFF_ms
