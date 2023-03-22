@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
     baro_init(BARO_ADDR);
     // lsm303_init(LSM303_ACCEL_ADDR, LSM303_MAG_ADDR);
     // MPU_6050_init(MPU_6050_ADDR);
-    ICM_20948_init(ICM_20948_ADDR);
+    ICM_20948_init(ICM_20948_ADDR, AK09916_MAG_ADDR);
     
     // MPU_6050_check_sanity();
     // lsm303_check_sanity();
