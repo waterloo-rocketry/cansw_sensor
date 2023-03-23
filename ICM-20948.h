@@ -2,12 +2,13 @@
 #define	ICM_20948_H
 
 #define ICM_20948_ADDR 0x69
+#define AK09916_MAG_ADDR 0x0c
 
 #include <stdint.h>
 #include <stdbool.h>
 
 // Set up gyroscope, accelerometer, and magnetometer
-bool ICM_20948_init(uint8_t ICM_20948_addr_in);
+bool ICM_20948_init(uint8_t ICM_20948_addr_in, uint8_t AK09916_mag_addr_in);
 
 // Check if the device is alive. Fails if an I2C can't be established
 // or if WHO_AM_I registers don't return default values.

@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
     MY2C_init();
     baro_init(BARO_ADDR);
     
-    ICM_20948_init(ICM_20948_ADDR);
+    ICM_20948_init(ICM_20948_ADDR, AK09916_MAG_ADDR);
     ICM_20948_check_sanity();
     
     // loop timers
