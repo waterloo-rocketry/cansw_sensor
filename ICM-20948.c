@@ -1,9 +1,6 @@
 #ifndef ICM_20948_H
 #define ICM_20948_H
 
-#define ICM_20948_ADDR 0x69
-#define AK09916_MAG_ADDR 0x0c
-
 #include "mcc_generated_files/device_config.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -11,9 +8,10 @@
 #include "my2c.h"
 #include "ICM-20948.h"   
 #include "ICM-20948_regmap.h"
+#include "sensor_general.h"
 
-static uint8_t ICM_20948_addr;
-static uint8_t AK09916_mag_addr;
+static uint8_t ICM_20948_addr = 0x68;
+static uint8_t AK09916_mag_addr = 0x0c;
 
 // This driver assumes that I2C is already initialized
 bool ICM_20948_init(uint8_t ICM_20948_addr_in, uint8_t AK09916_mag_addr_in) {
@@ -22,17 +20,27 @@ bool ICM_20948_init(uint8_t ICM_20948_addr_in, uint8_t AK09916_mag_addr_in) {
     
     // Select user bank 0
     MY2C_write1ByteRegister(ICM_20948_addr, REG_BANK_SEL, 0x00);
-    // Reset device & set clock to 20 MHz interal oscillator
-    MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_1, 0x80);
-    // Enable accelerometer and gyroscope
-    MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_2, 0x00);
+    // Wake device and set clock to internal 20 MHz oscillator
+    MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_1, 0x06);
+    // Enable accelerometer and gyroscope 
+   MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_2, 0x00);
+    // Operate accel and gyro in duty cycle mode, ODR determined by SMPLRT_DIV registers
+    MY2C_write1ByteRegister(ICM_20948_addr, LP_CONFIG, 0b01110000);
+
     
     // Select user bank 2
     MY2C_write1ByteRegister(ICM_20948_addr, REG_BANK_SEL, 0x20);
     // Set gyroscope full scale to +/-2000dps, rate = 9000 Hz
     MY2C_write1ByteRegister(ICM_20948_addr, GYRO_CONFIG_1, 0x06);
+    // Set ODR for gyroscope to 50Hz. ODR = 1100HZ/(1+GYRO_SMPLRT_DIV[7:0])
+    MY2C_write1ByteRegister(ICM_20948_addr, GYRO_SMPLRT_DIV, 0x15);
+    
     // Set accelerometer full scale to +/- 16g, rate = 4500 Hz
     MY2C_write1ByteRegister(ICM_20948_addr, ACCEL_CONFIG, 0x06);
+    // Set ODR for accelerometer to ~49Hz, ODR = 1125Hz/(1+ACCEL_SMPLRT_DIV[11:0])
+    MY2C_write1ByteRegister(ICM_20948_addr, ACCEL_SMPLRT_DIV_1, 0x00);
+    MY2C_write1ByteRegister(ICM_20948_addr, ACCEL_SMPLRT_DIV_2, 0x16);
+    
     // Reset magnetometer & set to continuous measurement mode 
     MY2C_write1ByteRegister(AK09916_mag_addr, CNTL3, 0x01);
     MY2C_write1ByteRegister(AK09916_mag_addr, CNTL2, 0x02);
@@ -41,15 +49,20 @@ bool ICM_20948_init(uint8_t ICM_20948_addr_in, uint8_t AK09916_mag_addr_in) {
 }
 
 bool ICM_20948_check_sanity(void) {
+    // Select user bank 0
+    MY2C_write1ByteRegister(ICM_20948_addr, REG_BANK_SEL, 0x00);
+    
     uint8_t addr_sanity = MY2C_read1ByteRegister(ICM_20948_addr, WHO_AM_I);
     uint8_t mag_addr_sanity = MY2C_read1ByteRegister(AK09916_mag_addr, WIA2);
     
     // Sanity fails if the "who am i" registers doesn't match
     if (addr_sanity != 0xEA || mag_addr_sanity != 0x09) {
+        LED_ON_B();
         return false;
     }
 
     // checks pass
+    LED_OFF_B();
     return true;
 }
 
@@ -123,6 +136,19 @@ bool ICM_20948_get_temp_raw(int16_t *temp) {
 bool ICM_20948_get_temp(int16_t *temp) {
     ICM_20948_get_temp_raw(temp);
     *temp /= 333.87;
+    return true;
+}
+
+bool ICM_20948_sleep(void) {
+    MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_1, 0b01000000);
+    
+    return true;
+}
+
+bool ICM_20948_wake(void) {
+    // clears SLEEP bit, does not reset device
+    MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_1, 0x00);
+    
     return true;
 }
 

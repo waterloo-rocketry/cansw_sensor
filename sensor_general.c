@@ -13,23 +13,52 @@
 const float VREF = 3.3;
 
 void LED_init(void) {
-    TRISB4 = 0;     //set B4 as output
-    LATB4 = 1;      // turn the led off
+    TRISB4 = 0;     //set B4, B3, B2 as output
+    TRISB3 = 0;
+    TRISB2 = 0;
+    LATB4 = 1;      // turn the leds off
+    LATB3 = 1;
+    LATB2 = 1;
 }
 
-void LED_heartbeat(void) {
+// Green LED
+void LED_heartbeat_G(void) {
     static bool led_on = false;
     if (led_on) {
-        LED_OFF();
+        LED_OFF_G();
         led_on = false;
     } else {
-        LED_ON();
+        LED_ON_G();
+        led_on = true;
+    }
+}
+
+// Blue LED
+void LED_heartbeat_B(void) {
+    static bool led_on = false;
+    if (led_on) {
+        LED_OFF_B();
+        led_on = false;
+    } else {
+        LED_ON_B();
+        led_on = true;
+    }
+}
+
+// White LED
+void LED_heartbeat_W(void) {
+    static bool led_on = false;
+    if (led_on) {
+        LED_OFF_W();
+        led_on = false;
+    } else {
+        LED_ON_W();
         led_on = true;
     }
 }
 
  uint32_t get_pressure_psi(void) {
-     adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_4);
+     adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_1);
 
      float v = (voltage_raw + 0.5f) / 4096.0f * VREF;
     
@@ -50,7 +79,7 @@ void LED_heartbeat(void) {
  }
 
 uint16_t get_temperature_c(void) {
-    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_3);
+    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_2);
 
     const float rdiv = 10000.0; // 10kohm dividor resistor
 
@@ -65,4 +94,20 @@ uint16_t get_temperature_c(void) {
     float invk = 1 / t0 + 1 / beta * log (r / r0);
   
     return (uint16_t) (1/invk - 273);
+}
+
+uint16_t get_sensor3_c(void) {
+    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_3);
+    
+    // analog sensor input, voltage divider r1 = r2 = 10k ohm
+    float volt = (((voltage_raw) * 2.0) / 4096.0f * VREF) * 1000;
+    return (uint16_t) (volt);
+}
+
+uint16_t get_sensor4_c(void) {
+    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_4);
+    
+    // analog sensor input, voltage divider r1 = r2 = 10k ohm
+    float volt = (((voltage_raw) * 2.0) / 4096.0f * VREF) * 1000;
+    return (uint16_t) (volt);
 }

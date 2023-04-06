@@ -23,9 +23,10 @@
 // Set any of these to zero to disable
 #define STATUS_TIME_DIFF_ms 500
 #define BARO_TIME_DIFF_ms 500
-#define IMU_TIME_DIFF_ms 0
-#define PRES_TIME_DIFF_ms 500
+#define IMU_TIME_DIFF_ms 500
+#define PRES_TIME_DIFF_ms 0
 #define TEMP_TIME_DIFF_ms 0
+#define SENS_TIME_DIFF_ms 0
 
 static void can_msg_handler(const can_msg_t *msg);
 static void send_status_ok(void);
@@ -69,6 +70,7 @@ int main(int argc, char** argv) {
     ICM_20948_init(ICM_20948_ADDR, AK09916_MAG_ADDR);
     ICM_20948_check_sanity();
     
+    
     // loop timers
     uint32_t last_status_millis = millis();
     uint32_t last_baro_millis = millis();
@@ -83,7 +85,7 @@ int main(int argc, char** argv) {
             status_ok &= check_bus_current_error();
             if (status_ok) { send_status_ok(); }
             
-            LED_heartbeat();
+            LED_heartbeat_G();
         }
 #if BARO_TIME_DIFF_ms
         if (millis() - last_baro_millis > BARO_TIME_DIFF_ms) {
@@ -111,7 +113,7 @@ int main(int argc, char** argv) {
             build_imu_data_msg(MSG_SENSOR_MAG, millis(), imuData, &imu_msg);
             txb_enqueue(&imu_msg);
 
-            ICM_20948_get_gyro(imuData, imuData + 1, imuData + 2);
+            ICM_20948_get_gyro_raw(imuData, imuData + 1, imuData + 2);
             build_imu_data_msg(MSG_SENSOR_GYRO, millis(), imuData, &imu_msg);
             txb_enqueue(&imu_msg);
         }
@@ -138,10 +140,23 @@ int main(int argc, char** argv) {
             txb_enqueue(&sensor_msg);
         }
 #endif
-        
+#if SENS_TIME_DIFF_ms
+        if (millis() - last_temp_millis > SENS_TIME_DIFF_ms) {
+            last_temp_millis = millis();
+            
+            uint16_t sensor_ana_c = get_sensor4_c();
+            
+            can_msg_t sensor_msg;
+            build_analog_data_msg(millis(), SENSOR_ROCKET_BATT, sensor_ana_c, &sensor_msg);
+            txb_enqueue(&sensor_msg);
+        }  
+#endif
+
         //send any queued CAN messages
         txb_heartbeat();
     }
+    
+    send_status_ok();
 
     // unreachable
     return (EXIT_SUCCESS);
@@ -174,11 +189,11 @@ static void can_msg_handler(const can_msg_t *msg) {
             break;
 
         case MSG_LEDS_ON:
-            LED_ON();
+            LED_ON_G();
             break;
 
         case MSG_LEDS_OFF:
-            LED_OFF();
+            LED_OFF_G();
             break;
 
         case MSG_RESET_CMD:
