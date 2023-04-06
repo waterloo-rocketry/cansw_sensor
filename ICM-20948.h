@@ -1,8 +1,8 @@
 #ifndef ICM_20948_H
 #define	ICM_20948_H
 
-#define ICM_20948_ADDR 0x68
-#define AK09916_MAG_ADDR 0x0c
+#define ICM_20948_ADDR 0x69
+#define AK09916_MAG_ADDR 0x0C
 
 #include <stdint.h>
 #include <stdbool.h>
