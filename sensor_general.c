@@ -95,19 +95,3 @@ uint16_t get_temperature_c(void) {
   
     return (uint16_t) (1/invk - 273);
 }
-
-uint16_t get_sensor3_c(void) {
-    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_3);
-    
-    // analog sensor input, voltage divider r1 = r2 = 10k ohm
-    float volt = (((voltage_raw) * 2.0) / 4096.0f * VREF) * 1000;
-    return (uint16_t) (volt);
-}
-
-uint16_t get_sensor4_c(void) {
-    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_4);
-    
-    // analog sensor input, voltage divider r1 = r2 = 10k ohm
-    float volt = (((voltage_raw) * 2.0) / 4096.0f * VREF) * 1000;
-    return (uint16_t) (volt);
-}

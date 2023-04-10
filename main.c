@@ -26,7 +26,6 @@
 #define IMU_TIME_DIFF_ms 500
 #define PRES_TIME_DIFF_ms 0
 #define TEMP_TIME_DIFF_ms 0
-#define SENS_TIME_DIFF_ms 0
 
 static void can_msg_handler(const can_msg_t *msg);
 static void send_status_ok(void);
@@ -139,17 +138,6 @@ int main(int argc, char** argv) {
             build_analog_data_msg(millis(), SENSOR_VENT_TEMP, temperature_c, &sensor_msg);
             txb_enqueue(&sensor_msg);
         }
-#endif
-#if SENS_TIME_DIFF_ms
-        if (millis() - last_temp_millis > SENS_TIME_DIFF_ms) {
-            last_temp_millis = millis();
-            
-            uint16_t sensor_ana_c = get_sensor4_c();
-            
-            can_msg_t sensor_msg;
-            build_analog_data_msg(millis(), SENSOR_ROCKET_BATT, sensor_ana_c, &sensor_msg);
-            txb_enqueue(&sensor_msg);
-        }  
 #endif
 
         //send any queued CAN messages

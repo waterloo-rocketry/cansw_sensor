@@ -10,6 +10,7 @@
 #include "ICM-20948_regmap.h"
 #include "sensor_general.h"
 
+//I2C addresses
 static uint8_t ICM_20948_addr = 0x69;
 static uint8_t AK09916_mag_addr = 0x0C;
 
@@ -24,9 +25,8 @@ bool ICM_20948_init(uint8_t ICM_20948_addr_in, uint8_t AK09916_mag_addr_in) {
     MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_1, 0x06);
     // Enable accelerometer and gyroscope 
    MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_2, 0x00);
-    // Operate accel and gyro in duty cycle mode, ODR determined by SMPLRT_DIV registers
+    // Allow ODR to be determined by SMPLRT_DIV registers
     MY2C_write1ByteRegister(ICM_20948_addr, LP_CONFIG, 0b01110000);
-
     
     // Select user bank 2
     MY2C_write1ByteRegister(ICM_20948_addr, REG_BANK_SEL, 0x20);
@@ -72,7 +72,7 @@ bool ICM_20948_get_accel_raw(int16_t *x, int16_t *y, int16_t *z) {
     uint8_t x_h = MY2C_read1ByteRegister(ICM_20948_addr, ACCEL_XOUT_H);
     uint8_t x_l = MY2C_read1ByteRegister(ICM_20948_addr, ACCEL_XOUT_L);
     *x = (int16_t)((uint16_t)x_h << 8 | x_l);
-
+    
     uint8_t y_h = MY2C_read1ByteRegister(ICM_20948_addr, ACCEL_YOUT_H);
     uint8_t y_l = MY2C_read1ByteRegister(ICM_20948_addr, ACCEL_YOUT_L);
     *y = (int16_t)((uint16_t)y_h << 8 | y_l);
@@ -139,19 +139,6 @@ bool ICM_20948_get_temp_raw(int16_t *temp) {
 bool ICM_20948_get_temp(int16_t *temp) {
     ICM_20948_get_temp_raw(temp);
     *temp /= 333.87;
-    return true;
-}
-
-bool ICM_20948_sleep(void) {
-    MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_1, 0b01000000);
-    
-    return true;
-}
-
-bool ICM_20948_wake(void) {
-    // clears SLEEP bit, does not reset device
-    MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_1, 0x00);
-    
     return true;
 }
 

@@ -15,6 +15,8 @@ bool ICM_20948_init(uint8_t ICM_20948_addr_in, uint8_t AK09916_mag_addr_in);
 
 bool ICM_20948_check_sanity(void);
 
+// Get IMU data: accelerometer, gyroscope, magnetometer, and temperature
+
 bool ICM_20948_get_accel_raw(int16_t *x, int16_t *y, int16_t *z);
 
 bool ICM_20948_get_gyro_raw(int16_t *x, int16_t *y, int16_t *z);
