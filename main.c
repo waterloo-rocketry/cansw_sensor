@@ -178,10 +178,14 @@ static void can_msg_handler(const can_msg_t *msg) {
 
         case MSG_LEDS_ON:
             LED_ON_G();
+            LED_ON_B();
+            LED_ON_W();
             break;
 
         case MSG_LEDS_OFF:
             LED_OFF_G();
+            LED_OFF_B();
+            LED_OFF_W();
             break;
 
         case MSG_RESET_CMD:

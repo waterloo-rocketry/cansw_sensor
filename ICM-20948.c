@@ -11,8 +11,8 @@
 #include "sensor_general.h"
 
 //I2C addresses
-static uint8_t ICM_20948_addr = 0x69;
-static uint8_t AK09916_mag_addr = 0x0C;
+static uint8_t ICM_20948_addr;
+static uint8_t AK09916_mag_addr;
 
 // This driver assumes that I2C is already initialized
 bool ICM_20948_init(uint8_t ICM_20948_addr_in, uint8_t AK09916_mag_addr_in) {
@@ -130,16 +130,12 @@ bool ICM_20948_get_mag_raw(int16_t *x, int16_t *y, int16_t *z) {
     return true;
 }
 
-bool ICM_20948_get_temp_raw(int16_t *temp) {
-    uint8_t t_h = MY2C_read1ByteRegister(ICM_20948_addr, TEMP_OUT_H);
-    uint8_t t_l = MY2C_read1ByteRegister(ICM_20948_addr, TEMP_OUT_L);
-    *temp = (int16_t)((uint16_t)t_h << 8 | t_l);
-}
+//IMU has a temperature sensor, it is not being used
 
-bool ICM_20948_get_temp(int16_t *temp) {
-    ICM_20948_get_temp_raw(temp);
-    *temp /= 333.87;
-    return true;
-}
+//bool ICM_20948_get_temp_raw(int16_t *temp) {
+//    uint8_t t_h = MY2C_read1ByteRegister(ICM_20948_addr, TEMP_OUT_H);
+//    uint8_t t_l = MY2C_read1ByteRegister(ICM_20948_addr, TEMP_OUT_L);
+//    *temp = (int16_t)((uint16_t)t_h << 8 | t_l);
+// }
 
 #endif
