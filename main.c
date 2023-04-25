@@ -18,6 +18,7 @@
 #include "baro.h"
 #include "my2c.h"
 #include "ICM-20948.h"
+#include "ICM-20948_regmap.h"
 #include <xc.h>
 
 // Set any of these to zero to disable
@@ -104,6 +105,9 @@ int main(int argc, char** argv) {
             int16_t imuData[3];
             can_msg_t imu_msg;
             
+            // Select user bank 0
+            MY2C_write1ByteRegister(ICM_20948_ADDR, REG_BANK_SEL, 0x00);
+            
             ICM_20948_get_accel_raw(imuData, imuData + 1, imuData + 2);
             build_imu_data_msg(MSG_SENSOR_ACC, millis(), imuData, &imu_msg);
             txb_enqueue(&imu_msg);
@@ -111,7 +115,7 @@ int main(int argc, char** argv) {
             ICM_20948_get_mag_raw(imuData, imuData + 1, imuData + 2);
             build_imu_data_msg(MSG_SENSOR_MAG, millis(), imuData, &imu_msg);
             txb_enqueue(&imu_msg);
-
+            
             ICM_20948_get_gyro_raw(imuData, imuData + 1, imuData + 2);
             build_imu_data_msg(MSG_SENSOR_GYRO, millis(), imuData, &imu_msg);
             txb_enqueue(&imu_msg);

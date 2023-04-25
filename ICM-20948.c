@@ -24,9 +24,9 @@ bool ICM_20948_init(uint8_t ICM_20948_addr_in, uint8_t AK09916_mag_addr_in) {
     // Wake device and set clock to internal 20 MHz oscillator
     MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_1, 0x06);
     // Enable accelerometer and gyroscope 
-   MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_2, 0x00);
+    MY2C_write1ByteRegister(ICM_20948_addr, PWR_MGMT_2, 0x00);
     // Allow ODR to be determined by SMPLRT_DIV registers
-    MY2C_write1ByteRegister(ICM_20948_addr, LP_CONFIG, 0b01110000);
+    MY2C_write1ByteRegister(ICM_20948_addr, LP_CONFIG, 0b01000000);
     
     // Select user bank 2
     MY2C_write1ByteRegister(ICM_20948_addr, REG_BANK_SEL, 0x20);
