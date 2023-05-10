@@ -57,12 +57,10 @@ void LED_heartbeat_W(void) {
     }
 }
 
- uint32_t get_pressure_psi(void) {
+ uint32_t get_pressure_psi_4_20_mA(void) {
      adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_1);
 
      float v = (voltage_raw + 0.5f) / 4096.0f * VREF;
-    
-#if USE_4_20_MA_SENSOR
     
     const double r = 100;
     const double pressure_range = 3000;
@@ -70,9 +68,21 @@ void LED_heartbeat_W(void) {
     double current = v / r;
 
     int32_t pressure_psi = (int32_t) (((current - 0.004) / (0.02 - 0.004)) * pressure_range);
-#else
+
+    return (uint32_t) pressure_psi + PT_OFFSET;
+
+ }
+ 
+  uint32_t get_pressure_psi_pneumatic(void) {
+     adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_3);
+
+     float v = (voltage_raw + 0.5f) / 4096.0f * VREF;
+    
+    const double pressure_range = 3000;
+
+    double current = (v / r) * 2; // 10kohm and 10kohm voltage divider
+
     int32_t pressure_psi = (int32_t) (v * 39.2f*3.0f - 39.2f);
-#endif
 
     return (uint32_t) pressure_psi + PT_OFFSET;
 
@@ -80,14 +90,14 @@ void LED_heartbeat_W(void) {
 
 uint16_t get_temperature_c(void) {
     adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_4);
-    const float rdiv = 10000.0; // 10kohm dividor resistor
+    const float rdiv = 10000.0; // 10kohm divider resistor
 
     // beta, r0, t0 from https://media.digikey.com/pdf/Data%20Sheets/Thermometrics%20Global%20Business%20PDFs/TG_Series.pdf
     const float beta = 3434.0;
     const float r0 = 10000.0;
     const float t0 = 298.15;   // 25 C in Kelvin
 
-    float v = (voltage_raw + 0.5f) / 4096.0f * VREF; // (raw + contiuity correction) / 12bit adc * vref
+    float v = (voltage_raw + 0.5f) / 4096.0f * VREF; // (raw + continuity correction) / 12bit adc * vref
     float r = v * rdiv / (VREF - v);
 
     float invk = 1 / t0 + 1 / beta * log (r / r0);
