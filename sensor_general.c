@@ -7,8 +7,8 @@
 
 #include "sensor_general.h"
 
-#define USE_4_20_MA_SENSOR 0
-#define PT_OFFSET 2
+#define USE_4_20_MA_SENSOR 1
+#define PT_OFFSET 0
 
 const float VREF = 3.3;
 
@@ -64,12 +64,12 @@ void LED_heartbeat_W(void) {
     
 #if USE_4_20_MA_SENSOR
     
-    const double r = 99.8;
+    const double r = 100;
     const double pressure_range = 3000;
 
     double current = v / r;
 
-    int32_t pressure_psi = (int32_t) ((current - 0.004) / (0.02 - 0.004) * pressure_range);
+    int32_t pressure_psi = (int32_t) (((current - 0.004) / (0.02 - 0.004)) * pressure_range);
 #else
     int32_t pressure_psi = (int32_t) (v * 39.2f*3.0f - 39.2f);
 #endif
@@ -79,8 +79,7 @@ void LED_heartbeat_W(void) {
  }
 
 uint16_t get_temperature_c(void) {
-    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_2);
-
+    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_4);
     const float rdiv = 10000.0; // 10kohm dividor resistor
 
     // beta, r0, t0 from https://media.digikey.com/pdf/Data%20Sheets/Thermometrics%20Global%20Business%20PDFs/TG_Series.pdf
