@@ -76,15 +76,15 @@ void LED_heartbeat_W(void) {
   uint32_t get_pressure_psi_pneumatic(void) {
      adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_3);
 
-     float v = (voltage_raw + 0.5f) / 4096.0f * VREF;
+     float v = ((voltage_raw + 0.5f) / 4096.0f * VREF) * 2; // 10kohm and 10kohm resistor divider
     
-    const double pressure_range = 3000;
+    //for PSE530-R06, see "Analog Output" graph here: https://www.smcpneumatics.com/pdfs/PSE.pdf
+    // analog output[V] = ((5[V]-0.6[V])/(1[MPa] - (-0.1[MPa]))*pressure[MPa], aka y = 4x + 1
+    int16_t pressure_psi = (int16_t) (((v - 1) / 4) * 145.038); // pressure[psi] = ((voltage - 1[V]) / 4[V/MPa]) * 145.038[psi]/[MPa]
 
-    double current = (v / r) * 2; // 10kohm and 10kohm voltage divider
+    // int32_t pressure_psi = (int32_t) (v * 39.2f*3.0f - 39.2f);
 
-    int32_t pressure_psi = (int32_t) (v * 39.2f*3.0f - 39.2f);
-
-    return (uint32_t) pressure_psi + PT_OFFSET;
+    return (uint16_t) pressure_psi;
 
  }
 
