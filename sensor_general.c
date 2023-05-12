@@ -88,7 +88,7 @@ uint16_t get_temperature_c(void) {
     const float t0 = 298.15;   // 25 C in Kelvin
 
     float v = (voltage_raw + 0.5f) / 4096.0f * VREF; // (raw + contiuity correction) / 12bit adc * vref
-    float r = v * rdiv / (VREF - v);
+    float r = ((VREF * rdiv) / v) - rdiv;
 
     float invk = 1 / t0 + 1 / beta * log (r / r0);
   
