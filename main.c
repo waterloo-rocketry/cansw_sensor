@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
         if (millis() - last_pres_millis > PRES_TIME_DIFF_ms) {
             last_pres_millis = millis();
             
-            uint16_t pressure_psi = get_pressure_psi();
+            uint16_t pressure_psi = update_pressure_psi_low_pass();
 
             can_msg_t sensor_msg;
             build_analog_data_msg(millis(), SENSOR_PRESSURE_OX, pressure_psi, &sensor_msg);

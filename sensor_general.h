@@ -27,6 +27,7 @@ void LED_heartbeat_W(void); //White LED
 // zero since canlib and RLCS don't like it.
 uint32_t get_pressure_psi(void);
 uint16_t get_temperature_c(void);
+uint16_t update_pressure_psi_low_pass(void);
 
 #endif	/* SENSOR_GEN_H */
 
