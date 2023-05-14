@@ -125,14 +125,14 @@ int main(int argc, char** argv) {
         if (millis() - last_pres_millis > PRES_TIME_DIFF_ms) {
             last_pres_millis = millis();
             
-            uint16_t pressure_psi_CC = get_pressure_psi_4_20_mA();
-            uint16_t pressure_psi_pneumatics = get_pressure_psi_pneumatic();
+            uint16_t pressure_4_20_psi = get_pressure_4_20_psi();
+            uint16_t pressure_pneumatics_psi = get_pressure_pneumatic_psi();
 
             can_msg_t sensor_msg;
-            build_analog_data_msg(millis(), SENSOR_PRESSURE_CC, pressure_psi_CC, &sensor_msg);
+            build_analog_data_msg(millis(), SENSOR_PRESSURE_CC, pressure_4_20_psi, &sensor_msg);
             txb_enqueue(&sensor_msg);
 
-            build_analog_data_msg(millis(), SENSOR_PRESSURE_PNEUMATICS, pressure_psi_pneumatics, &sensor_msg);
+            build_analog_data_msg(millis(), SENSOR_PRESSURE_PNEUMATICS, pressure_pneumatics_psi, &sensor_msg);
             txb_enqueue(&sensor_msg);
         }
 #endif

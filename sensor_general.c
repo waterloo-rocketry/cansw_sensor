@@ -7,7 +7,6 @@
 
 #include "sensor_general.h"
 
-#define USE_4_20_MA_SENSOR 1
 #define PT_OFFSET 0
 
 const float VREF = 3.3;
@@ -57,7 +56,7 @@ void LED_heartbeat_W(void) {
     }
 }
 
- uint32_t get_pressure_psi_4_20_mA(void) {
+ uint32_t get_pressure_4_20_psi(void) {
      adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_1);
 
      float v = (voltage_raw + 0.5f) / 4096.0f * VREF;
@@ -73,7 +72,7 @@ void LED_heartbeat_W(void) {
 
  }
  
-  uint32_t get_pressure_psi_pneumatic(void) {
+  uint32_t get_pressure_pneumatic_psi(void) {
      adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_3);
 
      float v = ((voltage_raw + 0.5f) / 4096.0f * VREF) * 2; // 10kohm and 10kohm resistor divider
@@ -98,9 +97,10 @@ uint16_t get_temperature_c(void) {
     const float t0 = 298.15;   // 25 C in Kelvin
 
     float v = (voltage_raw + 0.5f) / 4096.0f * VREF; // (raw + continuity correction) / 12bit adc * vref
-    float r = v * rdiv / (VREF - v);
+    float r = ((VREF * rdiv) / v) - rdiv;
 
     float invk = 1 / t0 + 1 / beta * log (r / r0);
   
     return (uint16_t) (1/invk - 273);
+    
 }
