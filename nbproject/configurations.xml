@@ -79,7 +79,7 @@
         <platformTool>snap</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>2.41</languageToolchainVersion>
-        <platform>3</platform>
+        <platform>4</platform>
       </toolsSet>
       <packs>
         <pack name="PIC18F-K_DFP" vendor="Microchip" version="1.7.134"/>
@@ -118,7 +118,7 @@
         <property key="default-bitfield-type" value="true"/>
         <property key="default-char-type" value="true"/>
         <property key="define-macros"
-                  value="BOARD_UNIQUE_ID=BOARD_ID_SENSOR_2;PT_SENSOR_ID=SENSOR_PRESSURE_PNEUMATICS"/>
+                  value="BOARD_UNIQUE_ID=BOARD_ID_SENSOR_PAYLOAD;PT_SENSOR_ID=SENSOR_PRESSURE_PNEUMATICS"/>
         <property key="disable-optimizations" value="true"/>
         <property key="extra-include-directories"
                   value="canlib;canlib/pic18f26k83;canlib/util"/>
