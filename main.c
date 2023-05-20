@@ -25,7 +25,8 @@
 #define STATUS_TIME_DIFF_ms 500 // 2 Hz
 #define BARO_TIME_DIFF_ms 500 // 2 Hz
 #define IMU_TIME_DIFF_ms 500 // 2 Hz
-#define PRES_TIME_DIFF_ms 500 // 2 Hz
+#define PRES_OX_CC_TIME_DIFF_ms 500 // 2 Hz
+#define PRES_PNEUMATICS_TIME_DIFF_ms 500 // 2 Hz
 #define TEMP_TIME_DIFF_ms 0 // 2 Hz
 
 static void can_msg_handler(const can_msg_t *msg);
@@ -121,17 +122,28 @@ int main(int argc, char** argv) {
             txb_enqueue(&imu_msg);
         }
 #endif
-#if PRES_TIME_DIFF_ms
-        if (millis() - last_pres_millis > PRES_TIME_DIFF_ms) {
+#if PRES_OX_CC_TIME_DIFF_ms
+        if (millis() - last_pres_millis > PRES_OX_CC_TIME_DIFF_ms) {
             last_pres_millis = millis();
             
-            uint16_t pressure_4_20_psi = get_pressure_4_20_psi();
-            uint16_t pressure_pneumatics_psi = get_pressure_pneumatic_psi();
-
+            // No low-pass filter
+            // uint16_t pressure_4_20_psi = get_pressure_4_20_psi();
+            
+            // With low-pass filter, uncomment if low-pass filtering required:
+            uint16_t pressure_4_20_psi = update_pressure_psi_low_pass();
+           
             can_msg_t sensor_msg;
-            build_analog_data_msg(millis(), SENSOR_PRESSURE_CC, pressure_4_20_psi, &sensor_msg);
+            build_analog_data_msg(millis(), PT_SENSOR_ID, pressure_4_20_psi, &sensor_msg);
             txb_enqueue(&sensor_msg);
-
+        }
+#endif
+#if PRES_PNEUMATICS_TIME_DIFF_ms
+        if (millis() - last_pres_millis > PRES_PNEUMATICS_TIME_DIFF_ms) {
+            last_pres_millis = millis();
+            
+            uint16_t pressure_pneumatics_psi = get_pressure_pneumatic_psi();
+            
+            can_msg_t sensor_msg;
             build_analog_data_msg(millis(), SENSOR_PRESSURE_PNEUMATICS, pressure_pneumatics_psi, &sensor_msg);
             txb_enqueue(&sensor_msg);
         }

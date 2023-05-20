@@ -8,6 +8,7 @@
 #include "sensor_general.h"
 
 #define PT_OFFSET 0
+#define PRES_TIME_DIFF_ms 500
 
 const float VREF = 3.3;
 
@@ -56,6 +57,7 @@ void LED_heartbeat_W(void) {
     }
 }
 
+// 4-20mA pressure transducer
  uint32_t get_pressure_4_20_psi(void) {
      adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_1);
 
@@ -86,7 +88,24 @@ void LED_heartbeat_W(void) {
     return (uint16_t) pressure_psi;
 
  }
+  
 
+// Low-pass filter for 4-20mA pressure transducer
+#define SAMPLE_FREQ (1000.0 / PRES_TIME_DIFF_ms)
+#define LOW_PASS_ALPHA(TR) ((SAMPLE_FREQ * TR / 5.0) / (1 + SAMPLE_FREQ * TR / 5.0))
+#define LOW_PASS_RESPONSE_TIME 10.0  //seconds
+double alpha_low = LOW_PASS_ALPHA(LOW_PASS_RESPONSE_TIME);
+double low_pass_pressure_psi = 0;
+
+uint16_t update_pressure_psi_low_pass(void){
+    
+    int16_t pressure_psi = get_pressure_4_20_psi();
+    
+    low_pass_pressure_psi = alpha_low*low_pass_pressure_psi + (1.0 - alpha_low)*pressure_psi;
+    return (uint16_t) low_pass_pressure_psi;
+}
+
+// 10kR thermistor
 uint16_t get_temperature_c(void) {
     adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_4);
     const float rdiv = 10000.0; // 10kohm divider resistor
