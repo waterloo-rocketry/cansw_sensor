@@ -76,7 +76,8 @@ int main(int argc, char** argv) {
     uint32_t last_status_millis = millis();
     uint32_t last_baro_millis = millis();
     uint32_t last_imu_millis = millis();
-    uint32_t last_pres_millis = millis();
+    uint32_t last_pres_ox_cc_millis = millis();
+    uint32_t last_pres_pneumatics_millis = millis();
     uint32_t last_temp_millis = millis();
     while (1) {
         if (millis() - last_status_millis > STATUS_TIME_DIFF_ms) {
@@ -123,8 +124,8 @@ int main(int argc, char** argv) {
         }
 #endif
 #if PRES_OX_CC_TIME_DIFF_ms
-        if (millis() - last_pres_millis > PRES_OX_CC_TIME_DIFF_ms) {
-            last_pres_millis = millis();
+        if (millis() - last_pres_ox_cc_millis > PRES_OX_CC_TIME_DIFF_ms) {
+            last_pres_ox_cc_millis = millis();
             
             // No low-pass filter
             // uint16_t pressure_4_20_psi = get_pressure_4_20_psi();
@@ -138,8 +139,8 @@ int main(int argc, char** argv) {
         }
 #endif
 #if PRES_PNEUMATICS_TIME_DIFF_ms
-        if (millis() - last_pres_millis > PRES_PNEUMATICS_TIME_DIFF_ms) {
-            last_pres_millis = millis();
+        if (millis() - last_pres_pneumatics_millis > PRES_PNEUMATICS_TIME_DIFF_ms) {
+            last_pres_pneumatics_millis = millis();
             
             uint16_t pressure_pneumatics_psi = get_pressure_pneumatic_psi();
             
