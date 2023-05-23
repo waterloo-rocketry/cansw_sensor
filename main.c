@@ -26,7 +26,7 @@
 #define BARO_TIME_DIFF_ms 500 // 2 Hz
 #define IMU_TIME_DIFF_ms 500 // 2 Hz
 #define PRES_OX_CC_TIME_DIFF_ms 500 // 2 Hz
-#define PRES_PNEUMATICS_TIME_DIFF_ms 500 // 2 Hz
+#define PRES_PNEUMATICS_TIME_DIFF_ms 500// 2 Hz
 #define TEMP_TIME_DIFF_ms 0 // 2 Hz
 
 static void can_msg_handler(const can_msg_t *msg);
@@ -78,8 +78,13 @@ int main(int argc, char** argv) {
     uint32_t last_imu_millis = millis();
     uint32_t last_pres_ox_cc_millis = millis();
     uint32_t last_pres_pneumatics_millis = millis();
+    uint32_t last_pres_low_millis = millis();
     uint32_t last_temp_millis = millis();
     while (1) {
+        if (OSCCON2 != 0x70) { // If the fail-safe clock monitor has triggered
+            OSCILLATOR_Initialize();
+        }
+        
         if (millis() - last_status_millis > STATUS_TIME_DIFF_ms) {
             last_status_millis = millis();
             
@@ -136,6 +141,12 @@ int main(int argc, char** argv) {
             can_msg_t sensor_msg;
             build_analog_data_msg(millis(), PT_SENSOR_ID, pressure_4_20_psi, &sensor_msg);
             txb_enqueue(&sensor_msg);
+        }
+#endif
+#if PRES_TIME_DIFF_ms
+        if (millis() - last_pres_low_millis > PRES_TIME_DIFF_ms) {
+            last_pres_low_millis = millis();
+            update_pressure_psi_low_pass();
         }
 #endif
 #if PRES_PNEUMATICS_TIME_DIFF_ms

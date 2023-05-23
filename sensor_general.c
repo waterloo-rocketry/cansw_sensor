@@ -8,7 +8,6 @@
 #include "sensor_general.h"
 
 #define PT_OFFSET 0
-#define PRES_TIME_DIFF_ms 500
 
 const float VREF = 3.3;
 

@@ -1,6 +1,9 @@
 #ifndef SENSOR_GEN_H
 #define	SENSOR_GEN_H
 
+
+#define PRES_TIME_DIFF_ms 50
+
 #include <stdint.h>
 
 // Contains miscellaneous sensor board-specific code
