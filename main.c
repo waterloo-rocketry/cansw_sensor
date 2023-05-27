@@ -21,16 +21,20 @@
 #include "ICM-20948_regmap.h"
 #include <xc.h>
 
+#define MAX_BUS_DEAD_TIME_ms 1000
+
 // Set any of these to zero to disable
 #define STATUS_TIME_DIFF_ms 500 // 2 Hz
 #define BARO_TIME_DIFF_ms 500 // 2 Hz
 #define IMU_TIME_DIFF_ms 500 // 2 Hz
 #define PRES_OX_CC_TIME_DIFF_ms 500 // 2 Hz
-#define PRES_PNEUMATICS_TIME_DIFF_ms 500// 2 Hz
-#define TEMP_TIME_DIFF_ms 0 // 2 Hz
+#define PRES_PNEUMATICS_TIME_DIFF_ms 0// 2 Hz
+#define TEMP_TIME_DIFF_ms 500 // 2 Hz
 
 static void can_msg_handler(const can_msg_t *msg);
 static void send_status_ok(void);
+
+uint32_t last_message_millis = 0;
 
 //memory pool for the CAN tx buffer
 uint8_t tx_pool[200];
@@ -81,8 +85,18 @@ int main(int argc, char** argv) {
     uint32_t last_pres_low_millis = millis();
     uint32_t last_temp_millis = millis();
     while (1) {
+        CLRWDT(); // feed the watchdog, which is set for 256ms
+        
         if (OSCCON2 != 0x70) { // If the fail-safe clock monitor has triggered
             OSCILLATOR_Initialize();
+        }
+        
+        uint32_t dt = millis() - last_message_millis;
+        // prevent race condition where last_message_millis is greater than millis
+        // by checking for overflow
+        if (dt > MAX_BUS_DEAD_TIME_ms && dt < (1 << 15)) {
+            // We've got too long without seeing a valid CAN message (including one of ours)
+            RESET();
         }
         
         if (millis() - last_status_millis > STATUS_TIME_DIFF_ms) {
@@ -196,6 +210,7 @@ static void __interrupt() interrupt_handler() {
 }
 
 static void can_msg_handler(const can_msg_t *msg) {
+    last_message_millis = millis();
     uint16_t msg_type = get_message_type(msg);
     int dest_id = -1;
     // ignore messages that were sent from this board

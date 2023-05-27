@@ -2,7 +2,7 @@
 #define	SENSOR_GEN_H
 
 
-#define PRES_TIME_DIFF_ms 50
+#define PRES_TIME_DIFF_ms 5
 
 #include <stdint.h>
 
