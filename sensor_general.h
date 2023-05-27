@@ -32,6 +32,8 @@ uint32_t get_pressure_4_20_psi(void);
 uint32_t get_pressure_pneumatic_psi(void);
 uint16_t update_pressure_psi_low_pass(void);
 uint16_t get_temperature_c(void);
+uint16_t get_temperature_c_100k_1(void);
+uint16_t get_temperature_c_100k_2(void);
 
 #endif	/* SENSOR_GEN_H */
 

@@ -25,9 +25,9 @@
 
 // Set any of these to zero to disable
 #define STATUS_TIME_DIFF_ms 500 // 2 Hz
-#define BARO_TIME_DIFF_ms 500 // 2 Hz
+#define BARO_TIME_DIFF_ms 0 // 0 Hz
 #define IMU_TIME_DIFF_ms 500 // 2 Hz
-#define PRES_OX_CC_TIME_DIFF_ms 500 // 2 Hz
+#define PRES_OX_CC_TIME_DIFF_ms 0 // 0 Hz
 #define PRES_PNEUMATICS_TIME_DIFF_ms 0// 2 Hz
 #define TEMP_TIME_DIFF_ms 500 // 2 Hz
 
@@ -178,10 +178,15 @@ int main(int argc, char** argv) {
         if (millis() - last_temp_millis > TEMP_TIME_DIFF_ms) {
             last_temp_millis = millis();
             
-            uint16_t temperature_c = get_temperature_c();
-            
             can_msg_t sensor_msg;
-            build_analog_data_msg(millis(), SENSOR_VENT_TEMP, temperature_c, &sensor_msg);
+            
+            
+            uint16_t temperature_c = get_temperature_c_100k_1();
+            build_analog_data_msg(millis(), SENSOR_ARM_BATT_1, temperature_c, &sensor_msg);
+            txb_enqueue(&sensor_msg);
+            
+            temperature_c = get_temperature_c_100k_2();
+            build_analog_data_msg(millis(), SENSOR_ARM_BATT_2, temperature_c, &sensor_msg);
             txb_enqueue(&sensor_msg);
         }
 #endif

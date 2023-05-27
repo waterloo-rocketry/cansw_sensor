@@ -122,3 +122,39 @@ uint16_t get_temperature_c(void) {
     return (uint16_t) (1/invk - 273);
     
 }
+
+uint16_t get_temperature_c_100k_1(void) {
+    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_2);
+    const float rdiv = 100000.0; // 10kohm divider resistor
+
+    // beta, r0, t0 from https://www.digikey.at/en/products/detail/littelfuse-inc/104JL1A/1014561
+    const float beta = 3892.0;
+    const float r0 = 100000.0;
+    const float t0 = 298.15;   // 25 C in Kelvin
+
+    float v = (voltage_raw + 0.5f) / 4096.0f * VREF; // (raw + continuity correction) / 12bit adc * vref
+    float r = ((VREF * rdiv) / v) - rdiv;
+
+    float invk = 1 / t0 + 1 / beta * log (r / r0);
+  
+    return (uint16_t) (1/invk - 273);
+    
+}
+
+uint16_t get_temperature_c_100k_2(void) {
+    adc_result_t voltage_raw = ADCC_GetSingleConversion(channel_SENSOR_4);
+    const float rdiv = 100000.0; // 10kohm divider resistor
+
+    // beta, r0, t0 from https://www.digikey.at/en/products/detail/littelfuse-inc/104JL1A/1014561
+    const float beta = 3892.0;
+    const float r0 = 100000.0;
+    const float t0 = 298.15;   // 25 C in Kelvin
+
+    float v = (voltage_raw + 0.5f) / 4096.0f * VREF; // (raw + continuity correction) / 12bit adc * vref
+    float r = ((VREF * rdiv) / v) - rdiv;
+
+    float invk = 1 / t0 + 1 / beta * log (r / r0);
+  
+    return (uint16_t) (1/invk - 273);
+    
+}
