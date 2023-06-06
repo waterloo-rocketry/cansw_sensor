@@ -80,7 +80,8 @@ void LED_heartbeat_W(void) {
     
     //for PSE530-R06, see "Analog Output" graph here: https://www.smcpneumatics.com/pdfs/PSE.pdf
     // analog output[V] = ((5[V]-0.6[V])/(1[MPa] - (-0.1[MPa]))*pressure[MPa], aka y = 4x + 1
-    int16_t pressure_psi = (int16_t) (((v - 1) / 4) * 145.038); // pressure[psi] = ((voltage - 1[V]) / 4[V/MPa]) * 145.038[psi]/[MPa]
+    // calibrated based on the PSE540 and DAQ.
+    int16_t pressure_psi = (int16_t) (((v - 1) / 4) * 165.34 + 5.2);
 
     // int32_t pressure_psi = (int32_t) (v * 39.2f*3.0f - 39.2f);
 
