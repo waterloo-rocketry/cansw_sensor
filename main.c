@@ -34,7 +34,7 @@
 static void can_msg_handler(const can_msg_t *msg);
 static void send_status_ok(void);
 
-uint32_t last_message_millis = 0;
+volatile bool seen_can_message = false;
 
 //memory pool for the CAN tx buffer
 uint8_t tx_pool[200];
@@ -76,6 +76,7 @@ int main(int argc, char** argv) {
     ICM_20948_check_sanity();
     
     
+    uint32_t last_message_millis = 0; // last time we saw a can message
     // loop timers
     uint32_t last_status_millis = millis();
     uint32_t last_baro_millis = millis();
@@ -87,15 +88,12 @@ int main(int argc, char** argv) {
     while (1) {
         CLRWDT(); // feed the watchdog, which is set for 256ms
         
-        // Using internal oscillator at 48 MHz so FSCM won't do anything.
-//        if (OSCCON2 != 0x70) { // If the fail-safe clock monitor has triggered
-//            OSCILLATOR_Initialize();
-//        }
+        if (seen_can_message) {
+            seen_can_message = false;
+            last_message_millis = millis();
+        }
         
-        uint32_t dt = millis() - last_message_millis;
-        // prevent race condition where last_message_millis is greater than millis
-        // by checking for overflow
-        if (dt > MAX_BUS_DEAD_TIME_ms && dt < (1 << 15)) {
+        if (millis() - last_message_millis > MAX_BUS_DEAD_TIME_ms) {
             // We've got too long without seeing a valid CAN message (including one of ours)
             RESET();
         }
@@ -211,7 +209,7 @@ static void __interrupt() interrupt_handler() {
 }
 
 static void can_msg_handler(const can_msg_t *msg) {
-    last_message_millis = millis();
+    seen_can_message = true;
     uint16_t msg_type = get_message_type(msg);
     int dest_id = -1;
     // ignore messages that were sent from this board
