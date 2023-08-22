@@ -26,10 +26,10 @@
 // Set any of these to zero to disable
 #define STATUS_TIME_DIFF_ms 500 // 2 Hz
 #define BARO_TIME_DIFF_ms 500 // 2 Hz
-#define IMU_TIME_DIFF_ms 500 // 2 Hz
-#define PRES_OX_CC_TIME_DIFF_ms 500 // 2 Hz
-#define PRES_PNEUMATICS_TIME_DIFF_ms 500 // 2 Hz
-#define TEMP_TIME_DIFF_ms 0 // 2 Hz
+#define IMU_TIME_DIFF_ms 67 // 15 Hz
+#define PRES_OX_CC_TIME_DIFF_ms 0 // Disabled
+#define PRES_PNEUMATICS_TIME_DIFF_ms 0 // Disabled
+#define TEMP_TIME_DIFF_ms 0 // Disabled
 
 static void can_msg_handler(const can_msg_t *msg);
 static void send_status_ok(void);
@@ -37,7 +37,7 @@ static void send_status_ok(void);
 volatile bool seen_can_message = false;
 
 //memory pool for the CAN tx buffer
-uint8_t tx_pool[200];
+uint8_t tx_pool[1600];
 
 int main(int argc, char** argv) {
     // MCC generated initializer
