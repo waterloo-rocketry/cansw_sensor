@@ -1,5 +1,5 @@
-#ifndef ICM-20948_REG_H
-#define ICM-20948_REG_H
+#ifndef ICM_20948_REG_H
+#define ICM_20948_REG_H
 
 
 #define REG_BANK_SEL 0x7F // select user bank 0, 1, 2, or 3

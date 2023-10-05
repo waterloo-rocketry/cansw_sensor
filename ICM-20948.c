@@ -1,6 +1,3 @@
-#ifndef ICM_20948_H
-#define ICM_20948_H
-
 #include "mcc_generated_files/device_config.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -125,7 +122,7 @@ bool ICM_20948_get_mag_raw(int16_t *x, int16_t *y, int16_t *z) {
     *z = (int16_t)((uint16_t)z_h << 8 | z_l);
 
     // Must read ST2 register after measurement, see datasheet register 13.4 ST2
-    uint8_t mag_status_2 = MY2C_read1ByteRegister(AK09916_mag_addr, ST2);
+    MY2C_read1ByteRegister(AK09916_mag_addr, ST2);
     
     return true;
 }
@@ -137,5 +134,3 @@ bool ICM_20948_get_mag_raw(int16_t *x, int16_t *y, int16_t *z) {
 //    uint8_t t_l = MY2C_read1ByteRegister(ICM_20948_addr, TEMP_OUT_L);
 //    *temp = (int16_t)((uint16_t)t_h << 8 | t_l);
 // }
-
-#endif
