@@ -58,15 +58,9 @@ void SYSTEM_Initialize(void)
 
 void OSCILLATOR_Initialize(void)
 {
-    //Select external oscillator with PLL of 1:1
-    OSCCON1 = 0x70;
-    //wait until the clock switch has happened
-    while (OSCCON3bits.ORDY == 0)  {}
-    //if the currently active clock (CON2) isn't the selected clock (CON1)
-    if (OSCCON2 != 0b01110000) {
-        //infinite loop, something is broken, what even is an assert()?
-        while (1) {}
-    }
+    // Set the internal oscillator frequency to 48 MHz
+    OSCFRQbits.FRQ = 0b0111;
+    // Don't use the external oscillator since it has interference issues.
 }
 
 void PMD_Initialize(void)

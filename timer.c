@@ -18,10 +18,13 @@
 #define MILLIS_REMAINDER 64
 #define MILLIS_INCREMENT_CAP 125
 
- static uint32_t millis_counter = 0;
+volatile static uint32_t millis_counter = 0;
 
- uint32_t millis(void) {
-    return millis_counter;
+uint32_t millis(void) {
+    INTCON0bits.GIE = 0;
+    uint32_t res = millis_counter;
+    INTCON0bits.GIE = 1;
+    return res;
 }
  
 void timer0_init(void) { 
@@ -34,7 +37,7 @@ void timer0_init(void) {
     T0CON1bits.CKPS = 0;
     
     T0CON1bits.CS = 0x5;    // drive timer from 500 kHz
-    T0CON1bits.ASYNC = 1;
+    T0CON1bits.ASYNC = 0;
 
      //enable the module
     T0CON0bits.EN = 1;

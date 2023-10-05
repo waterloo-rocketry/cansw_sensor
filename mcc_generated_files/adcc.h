@@ -89,9 +89,11 @@ typedef __uint24 uint24_t;
 typedef enum
 {
     channel_CURR_5V =  0x0,
-    channel_THERM =  0x1,
-    channel_PRESSURE =  0x2,
-    channel_CURR_12V =  0x3,
+    channel_CURR_12V =  0x1,
+    channel_SENSOR_3 =  0x2,
+    channel_SENSOR_4 =  0x3,
+    channel_SENSOR_1 =  0x4,
+    channel_SENSOR_2 =  0x5,
     channel_VSS =  0x3B,
     channel_Temp =  0x3C,
     channel_DAC1 =  0x3D,

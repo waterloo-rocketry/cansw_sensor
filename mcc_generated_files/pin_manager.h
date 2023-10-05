@@ -85,65 +85,105 @@
 #define channel_CURR_5V_SetAnalogMode()      do { ANSELAbits.ANSELA0 = 1; } while(0)
 #define channel_CURR_5V_SetDigitalMode()     do { ANSELAbits.ANSELA0 = 0; } while(0)
 
-// get/set channel_THERM aliases
-#define channel_THERM_TRIS                 TRISAbits.TRISA1
-#define channel_THERM_LAT                  LATAbits.LATA1
-#define channel_THERM_PORT                 PORTAbits.RA1
-#define channel_THERM_WPU                  WPUAbits.WPUA1
-#define channel_THERM_OD                   ODCONAbits.ODCA1
-#define channel_THERM_ANS                  ANSELAbits.ANSELA1
-#define channel_THERM_SetHigh()            do { LATAbits.LATA1 = 1; } while(0)
-#define channel_THERM_SetLow()             do { LATAbits.LATA1 = 0; } while(0)
-#define channel_THERM_Toggle()             do { LATAbits.LATA1 = ~LATAbits.LATA1; } while(0)
-#define channel_THERM_GetValue()           PORTAbits.RA1
-#define channel_THERM_SetDigitalInput()    do { TRISAbits.TRISA1 = 1; } while(0)
-#define channel_THERM_SetDigitalOutput()   do { TRISAbits.TRISA1 = 0; } while(0)
-#define channel_THERM_SetPullup()          do { WPUAbits.WPUA1 = 1; } while(0)
-#define channel_THERM_ResetPullup()        do { WPUAbits.WPUA1 = 0; } while(0)
-#define channel_THERM_SetPushPull()        do { ODCONAbits.ODCA1 = 0; } while(0)
-#define channel_THERM_SetOpenDrain()       do { ODCONAbits.ODCA1 = 1; } while(0)
-#define channel_THERM_SetAnalogMode()      do { ANSELAbits.ANSELA1 = 1; } while(0)
-#define channel_THERM_SetDigitalMode()     do { ANSELAbits.ANSELA1 = 0; } while(0)
-
-// get/set channel_PRESSURE aliases
-#define channel_PRESSURE_TRIS                 TRISAbits.TRISA2
-#define channel_PRESSURE_LAT                  LATAbits.LATA2
-#define channel_PRESSURE_PORT                 PORTAbits.RA2
-#define channel_PRESSURE_WPU                  WPUAbits.WPUA2
-#define channel_PRESSURE_OD                   ODCONAbits.ODCA2
-#define channel_PRESSURE_ANS                  ANSELAbits.ANSELA2
-#define channel_PRESSURE_SetHigh()            do { LATAbits.LATA2 = 1; } while(0)
-#define channel_PRESSURE_SetLow()             do { LATAbits.LATA2 = 0; } while(0)
-#define channel_PRESSURE_Toggle()             do { LATAbits.LATA2 = ~LATAbits.LATA2; } while(0)
-#define channel_PRESSURE_GetValue()           PORTAbits.RA2
-#define channel_PRESSURE_SetDigitalInput()    do { TRISAbits.TRISA2 = 1; } while(0)
-#define channel_PRESSURE_SetDigitalOutput()   do { TRISAbits.TRISA2 = 0; } while(0)
-#define channel_PRESSURE_SetPullup()          do { WPUAbits.WPUA2 = 1; } while(0)
-#define channel_PRESSURE_ResetPullup()        do { WPUAbits.WPUA2 = 0; } while(0)
-#define channel_PRESSURE_SetPushPull()        do { ODCONAbits.ODCA2 = 0; } while(0)
-#define channel_PRESSURE_SetOpenDrain()       do { ODCONAbits.ODCA2 = 1; } while(0)
-#define channel_PRESSURE_SetAnalogMode()      do { ANSELAbits.ANSELA2 = 1; } while(0)
-#define channel_PRESSURE_SetDigitalMode()     do { ANSELAbits.ANSELA2 = 0; } while(0)
-
 // get/set channel_CURR_12V aliases
-#define channel_CURR_12V_TRIS                 TRISAbits.TRISA3
-#define channel_CURR_12V_LAT                  LATAbits.LATA3
-#define channel_CURR_12V_PORT                 PORTAbits.RA3
-#define channel_CURR_12V_WPU                  WPUAbits.WPUA3
-#define channel_CURR_12V_OD                   ODCONAbits.ODCA3
-#define channel_CURR_12V_ANS                  ANSELAbits.ANSELA3
-#define channel_CURR_12V_SetHigh()            do { LATAbits.LATA3 = 1; } while(0)
-#define channel_CURR_12V_SetLow()             do { LATAbits.LATA3 = 0; } while(0)
-#define channel_CURR_12V_Toggle()             do { LATAbits.LATA3 = ~LATAbits.LATA3; } while(0)
-#define channel_CURR_12V_GetValue()           PORTAbits.RA3
-#define channel_CURR_12V_SetDigitalInput()    do { TRISAbits.TRISA3 = 1; } while(0)
-#define channel_CURR_12V_SetDigitalOutput()   do { TRISAbits.TRISA3 = 0; } while(0)
-#define channel_CURR_12V_SetPullup()          do { WPUAbits.WPUA3 = 1; } while(0)
-#define channel_CURR_12V_ResetPullup()        do { WPUAbits.WPUA3 = 0; } while(0)
-#define channel_CURR_12V_SetPushPull()        do { ODCONAbits.ODCA3 = 0; } while(0)
-#define channel_CURR_12V_SetOpenDrain()       do { ODCONAbits.ODCA3 = 1; } while(0)
-#define channel_CURR_12V_SetAnalogMode()      do { ANSELAbits.ANSELA3 = 1; } while(0)
-#define channel_CURR_12V_SetDigitalMode()     do { ANSELAbits.ANSELA3 = 0; } while(0)
+#define channel_CURR_12V_TRIS                 TRISAbits.TRISA1
+#define channel_CURR_12V_LAT                  LATAbits.LATA1
+#define channel_CURR_12V_PORT                 PORTAbits.RA1
+#define channel_CURR_12V_WPU                  WPUAbits.WPUA1
+#define channel_CURR_12V_OD                   ODCONAbits.ODCA1
+#define channel_CURR_12V_ANS                  ANSELAbits.ANSELA1
+#define channel_CURR_12V_SetHigh()            do { LATAbits.LATA1 = 1; } while(0)
+#define channel_CURR_12V_SetLow()             do { LATAbits.LATA1 = 0; } while(0)
+#define channel_CURR_12V_Toggle()             do { LATAbits.LATA1 = ~LATAbits.LATA1; } while(0)
+#define channel_CURR_12V_GetValue()           PORTAbits.RA1
+#define channel_CURR_12V_SetDigitalInput()    do { TRISAbits.TRISA1 = 1; } while(0)
+#define channel_CURR_12V_SetDigitalOutput()   do { TRISAbits.TRISA1 = 0; } while(0)
+#define channel_CURR_12V_SetPullup()          do { WPUAbits.WPUA1 = 1; } while(0)
+#define channel_CURR_12V_ResetPullup()        do { WPUAbits.WPUA1 = 0; } while(0)
+#define channel_CURR_12V_SetPushPull()        do { ODCONAbits.ODCA1 = 0; } while(0)
+#define channel_CURR_12V_SetOpenDrain()       do { ODCONAbits.ODCA1 = 1; } while(0)
+#define channel_CURR_12V_SetAnalogMode()      do { ANSELAbits.ANSELA1 = 1; } while(0)
+#define channel_CURR_12V_SetDigitalMode()     do { ANSELAbits.ANSELA1 = 0; } while(0)
+
+// get/set channel_SENSOR_3 aliases
+#define channel_SENSOR_3_TRIS                 TRISAbits.TRISA2
+#define channel_SENSOR_3_LAT                  LATAbits.LATA2
+#define channel_SENSOR_3_PORT                 PORTAbits.RA2
+#define channel_SENSOR_3_WPU                  WPUAbits.WPUA2
+#define channel_SENSOR_3_OD                   ODCONAbits.ODCA2
+#define channel_SENSOR_3_ANS                  ANSELAbits.ANSELA2
+#define channel_SENSOR_3_SetHigh()            do { LATAbits.LATA2 = 1; } while(0)
+#define channel_SENSOR_3_SetLow()             do { LATAbits.LATA2 = 0; } while(0)
+#define channel_SENSOR_3_Toggle()             do { LATAbits.LATA2 = ~LATAbits.LATA2; } while(0)
+#define channel_SENSOR_3_GetValue()           PORTAbits.RA2
+#define channel_SENSOR_3_SetDigitalInput()    do { TRISAbits.TRISA2 = 1; } while(0)
+#define channel_SENSOR_3_SetDigitalOutput()   do { TRISAbits.TRISA2 = 0; } while(0)
+#define channel_SENSOR_3_SetPullup()          do { WPUAbits.WPUA2 = 1; } while(0)
+#define channel_SENSOR_3_ResetPullup()        do { WPUAbits.WPUA2 = 0; } while(0)
+#define channel_SENSOR_3_SetPushPull()        do { ODCONAbits.ODCA2 = 0; } while(0)
+#define channel_SENSOR_3_SetOpenDrain()       do { ODCONAbits.ODCA2 = 1; } while(0)
+#define channel_SENSOR_3_SetAnalogMode()      do { ANSELAbits.ANSELA2 = 1; } while(0)
+#define channel_SENSOR_3_SetDigitalMode()     do { ANSELAbits.ANSELA2 = 0; } while(0)
+
+// get/set channel_SENSOR_4 aliases
+#define channel_SENSOR_4_TRIS                 TRISAbits.TRISA3
+#define channel_SENSOR_4_LAT                  LATAbits.LATA3
+#define channel_SENSOR_4_PORT                 PORTAbits.RA3
+#define channel_SENSOR_4_WPU                  WPUAbits.WPUA3
+#define channel_SENSOR_4_OD                   ODCONAbits.ODCA3
+#define channel_SENSOR_4_ANS                  ANSELAbits.ANSELA3
+#define channel_SENSOR_4_SetHigh()            do { LATAbits.LATA3 = 1; } while(0)
+#define channel_SENSOR_4_SetLow()             do { LATAbits.LATA3 = 0; } while(0)
+#define channel_SENSOR_4_Toggle()             do { LATAbits.LATA3 = ~LATAbits.LATA3; } while(0)
+#define channel_SENSOR_4_GetValue()           PORTAbits.RA3
+#define channel_SENSOR_4_SetDigitalInput()    do { TRISAbits.TRISA3 = 1; } while(0)
+#define channel_SENSOR_4_SetDigitalOutput()   do { TRISAbits.TRISA3 = 0; } while(0)
+#define channel_SENSOR_4_SetPullup()          do { WPUAbits.WPUA3 = 1; } while(0)
+#define channel_SENSOR_4_ResetPullup()        do { WPUAbits.WPUA3 = 0; } while(0)
+#define channel_SENSOR_4_SetPushPull()        do { ODCONAbits.ODCA3 = 0; } while(0)
+#define channel_SENSOR_4_SetOpenDrain()       do { ODCONAbits.ODCA3 = 1; } while(0)
+#define channel_SENSOR_4_SetAnalogMode()      do { ANSELAbits.ANSELA3 = 1; } while(0)
+#define channel_SENSOR_4_SetDigitalMode()     do { ANSELAbits.ANSELA3 = 0; } while(0)
+
+// get/set channel_SENSOR_1 aliases
+#define channel_SENSOR_1_TRIS                 TRISAbits.TRISA4
+#define channel_SENSOR_1_LAT                  LATAbits.LATA4
+#define channel_SENSOR_1_PORT                 PORTAbits.RA4
+#define channel_SENSOR_1_WPU                  WPUAbits.WPUA4
+#define channel_SENSOR_1_OD                   ODCONAbits.ODCA4
+#define channel_SENSOR_1_ANS                  ANSELAbits.ANSELA4
+#define channel_SENSOR_1_SetHigh()            do { LATAbits.LATA4 = 1; } while(0)
+#define channel_SENSOR_1_SetLow()             do { LATAbits.LATA4 = 0; } while(0)
+#define channel_SENSOR_1_Toggle()             do { LATAbits.LATA4 = ~LATAbits.LATA4; } while(0)
+#define channel_SENSOR_1_GetValue()           PORTAbits.RA4
+#define channel_SENSOR_1_SetDigitalInput()    do { TRISAbits.TRISA4 = 1; } while(0)
+#define channel_SENSOR_1_SetDigitalOutput()   do { TRISAbits.TRISA4 = 0; } while(0)
+#define channel_SENSOR_1_SetPullup()          do { WPUAbits.WPUA4 = 1; } while(0)
+#define channel_SENSOR_1_ResetPullup()        do { WPUAbits.WPUA4 = 0; } while(0)
+#define channel_SENSOR_1_SetPushPull()        do { ODCONAbits.ODCA4 = 0; } while(0)
+#define channel_SENSOR_1_SetOpenDrain()       do { ODCONAbits.ODCA4 = 1; } while(0)
+#define channel_SENSOR_1_SetAnalogMode()      do { ANSELAbits.ANSELA4 = 1; } while(0)
+#define channel_SENSOR_1_SetDigitalMode()     do { ANSELAbits.ANSELA4 = 0; } while(0)
+
+// get/set channel_SENSOR_2 aliases
+#define channel_SENSOR_2_TRIS                 TRISAbits.TRISA5
+#define channel_SENSOR_2_LAT                  LATAbits.LATA5
+#define channel_SENSOR_2_PORT                 PORTAbits.RA5
+#define channel_SENSOR_2_WPU                  WPUAbits.WPUA5
+#define channel_SENSOR_2_OD                   ODCONAbits.ODCA5
+#define channel_SENSOR_2_ANS                  ANSELAbits.ANSELA5
+#define channel_SENSOR_2_SetHigh()            do { LATAbits.LATA5 = 1; } while(0)
+#define channel_SENSOR_2_SetLow()             do { LATAbits.LATA5 = 0; } while(0)
+#define channel_SENSOR_2_Toggle()             do { LATAbits.LATA5 = ~LATAbits.LATA5; } while(0)
+#define channel_SENSOR_2_GetValue()           PORTAbits.RA5
+#define channel_SENSOR_2_SetDigitalInput()    do { TRISAbits.TRISA5 = 1; } while(0)
+#define channel_SENSOR_2_SetDigitalOutput()   do { TRISAbits.TRISA5 = 0; } while(0)
+#define channel_SENSOR_2_SetPullup()          do { WPUAbits.WPUA5 = 1; } while(0)
+#define channel_SENSOR_2_ResetPullup()        do { WPUAbits.WPUA5 = 0; } while(0)
+#define channel_SENSOR_2_SetPushPull()        do { ODCONAbits.ODCA5 = 0; } while(0)
+#define channel_SENSOR_2_SetOpenDrain()       do { ODCONAbits.ODCA5 = 1; } while(0)
+#define channel_SENSOR_2_SetAnalogMode()      do { ANSELAbits.ANSELA5 = 1; } while(0)
+#define channel_SENSOR_2_SetDigitalMode()     do { ANSELAbits.ANSELA5 = 0; } while(0)
 
 // get/set RC3 procedures
 #define RC3_SetHigh()            do { LATCbits.LATC3 = 1; } while(0)
